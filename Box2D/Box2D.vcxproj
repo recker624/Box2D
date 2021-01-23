@@ -154,6 +154,12 @@
   <ItemGroup>
     <ResourceCompile Include="Box2D.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="vertex.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="fragment.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
