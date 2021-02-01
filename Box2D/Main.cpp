@@ -1,6 +1,12 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
+#include<glm/glm.hpp>
+#include<glm/gtc/matrix_transform.hpp>
+#include<glm/gtc/type_ptr.hpp>
+
+#include "stb_image.h"
+
 #include<iostream>
 #include<fstream>
 #include<sstream>
@@ -10,11 +16,12 @@
 #define WIN_WIDTH 800
 
 void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window, unsigned int shaderProgram, unsigned int uniformVarLocation, GLfloat& moveDisX, GLfloat& moveDisY);
+void processInput(GLFWwindow *window, unsigned int shaderProgram);
 void createGLObjects(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO);
 void createShaderProgram(unsigned int& shaderProgram);
 std::string getShaderSource(std::string fileName);
 void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type);
+void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture);
 
 int main() {
 	//initialise glfw
@@ -55,28 +62,41 @@ int main() {
 
 	unsigned int shaderProgram;
 	createShaderProgram(shaderProgram);
+	glUseProgram(shaderProgram);
 
-	unsigned int uniformVarLocation = glGetUniformLocation(shaderProgram, "updatePos");
-	glUniform3f(uniformVarLocation, 0, 0, 0);
-	float moveDisX = 0;
-	float moveDisY = 0;
+	unsigned int firstTexture, secondTexture;
+	applyTextures(firstTexture, secondTexture);
+
+	//set the values of sampler2d variables in fragment shader
+	glUniform1i(glGetUniformLocation(shaderProgram, "firstTexture"), 0);
+	glUniform1i(glGetUniformLocation(shaderProgram, "secondTexture"), 1);
 
 	//render loop
 	while (!glfwWindowShouldClose(window)) {
 
-		processInput(window, shaderProgram, uniformVarLocation, moveDisX, moveDisY);
+		processInput(window, shaderProgram);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(shaderProgram);
-		glBindVertexArray(vao);
+
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, firstTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, secondTexture);
+
+		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &ebo);
 
 	glfwTerminate();
 	return 0;
@@ -86,13 +106,13 @@ int main() {
 
 
 
-
 void createGLObjects(unsigned int& vbo, unsigned int& vao, unsigned int& ebo) {
 	float vertices[] = {
-		 0.5f,  0.5f, 0.0f,  // top right
-		 0.5f, -0.5f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f,  // bottom left
-		-0.5f,  0.5f, 0.0f   // top left 
+		// positions          // colors           // texture coords
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
 	};
 
 	unsigned int indices[] = { 
@@ -111,8 +131,15 @@ void createGLObjects(unsigned int& vbo, unsigned int& vao, unsigned int& ebo) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	//tell opengl how to interpret the vertex data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	//position coordinates
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	//color values
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	//texture coordinates
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 }
 
 void createShaderProgram(unsigned int& shaderProgram) {
@@ -159,7 +186,7 @@ std::string getShaderSource(std::string fileName) {
 			//read the buffer contents into a string
 			sourceCode = shaderStream.str();
 		}
-		catch (std::ifstream::failure& e) {
+		catch (std::ifstream::failure e) {
 			std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
 		}
 	}
@@ -187,25 +214,60 @@ void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type) {
 	
 }
 
-void processInput(GLFWwindow* window, unsigned int shaderProgram, unsigned int uniformVarLocation, GLfloat& moveDisX, GLfloat& moveDisY) {
+void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture) {
+	//first texture
+	glGenTextures(1, &firstTexture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, firstTexture);
+
+	//set the texture parameters (wrapping/filtering options)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width_1, height_1, nrChannels_1; 
+	//convert the image to an array of bytes
+	unsigned char* imgData_1 = stbi_load("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg", &width_1, &height_1, &nrChannels_1, 0);
+	if (imgData_1) {
+		//generate the texture using the image data
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_1, height_1, 0, GL_RGB, GL_UNSIGNED_BYTE, imgData_1);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to load texture_1" << std::endl;
+	}
+
+	//second Texture
+	glGenTextures(1, &secondTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, secondTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width_2, height_2, nrChannels_2;
+	stbi_set_flip_vertically_on_load(true);
+
+	unsigned char* imgData_2 = stbi_load("C:\\Users\\sahil\\OneDrive\\Desktop\\awesomeface.png", &width_2, &height_2, &nrChannels_2, 0);
+	if (imgData_2) {
+		//generate the texture using the image data
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_2, height_2, 0, GL_RGB, GL_UNSIGNED_BYTE, imgData_2);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to load texture_2" << std::endl;
+	}
+
+	stbi_image_free(imgData_1);
+	stbi_image_free(imgData_2);
+}
+
+void processInput(GLFWwindow* window, unsigned int shaderProgram) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		moveDisY += 0.01;
-		glUniform3f(uniformVarLocation, moveDisX, moveDisY, 0);
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		moveDisY -= 0.01;
-		glUniform3f(uniformVarLocation, moveDisX, moveDisY, 0);
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		moveDisX += 0.01;
-		glUniform3f(uniformVarLocation, moveDisX, moveDisY, 0);
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		moveDisX -= 0.01;
-		glUniform3f(uniformVarLocation, moveDisX, moveDisY, 0);
 	}
 }
 
