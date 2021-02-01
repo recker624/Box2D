@@ -79,14 +79,13 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shaderProgram);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, firstTexture);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, secondTexture);
 
+		glUseProgram(shaderProgram);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -215,54 +214,55 @@ void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type) {
 }
 
 void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture) {
-	//first texture
+
 	glGenTextures(1, &firstTexture);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, firstTexture);
-
-	//set the texture parameters (wrapping/filtering options)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load image, create texture and generate mipmaps
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true); 
 
-	int width_1, height_1, nrChannels_1; 
-	//convert the image to an array of bytes
-	unsigned char* imgData_1 = stbi_load("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg", &width_1, &height_1, &nrChannels_1, 0);
-	if (imgData_1) {
-		//generate the texture using the image data
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_1, height_1, 0, GL_RGB, GL_UNSIGNED_BYTE, imgData_1);
+	unsigned char* data = stbi_load("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
-	else {
-		std::cout << "Failed to load texture_1" << std::endl;
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
 	}
+	stbi_image_free(data);
 
-	//second Texture
+
+	// texture 2
 	glGenTextures(1, &secondTexture);
-	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, secondTexture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int width_2, height_2, nrChannels_2;
-	stbi_set_flip_vertically_on_load(true);
-
-	unsigned char* imgData_2 = stbi_load("C:\\Users\\sahil\\OneDrive\\Desktop\\awesomeface.png", &width_2, &height_2, &nrChannels_2, 0);
-	if (imgData_2) {
-		//generate the texture using the image data
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_2, height_2, 0, GL_RGB, GL_UNSIGNED_BYTE, imgData_2);
+	// load image, create texture and generate mipmaps
+	data = stbi_load("C:\\Users\\sahil\\OneDrive\\Desktop\\awesomeface.png", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		// note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
-	else {
-		std::cout << "Failed to load texture_2" << std::endl;
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
 	}
+	stbi_image_free(data);
 
-	stbi_image_free(imgData_1);
-	stbi_image_free(imgData_2);
 }
 
 void processInput(GLFWwindow* window, unsigned int shaderProgram) {
