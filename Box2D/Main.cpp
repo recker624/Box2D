@@ -12,8 +12,11 @@
 #include<sstream>
 #include<string>
 
-#define WIN_HEIGHT 600
-#define WIN_WIDTH 800
+#define WIN_HEIGHT 1080
+#define WIN_WIDTH 1920
+
+float moveDis = 0;
+
 
 void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window, unsigned int shaderProgram);
@@ -39,6 +42,7 @@ int main() {
 #endif
 
 	//create window
+	// use glfwGetPrimaryMonitor() for fullscreen mode
 	GLFWwindow* window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Box 2D", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Window creation unsuccessful" << std::endl;
@@ -48,8 +52,11 @@ int main() {
 
 	glfwMakeContextCurrent(window);
 	//register callback functions
+	//any callbacks should be registered after we have set a window context as "current"
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
 	
+
+
 	//initialise GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
@@ -71,6 +78,39 @@ int main() {
 	glUniform1i(glGetUniformLocation(shaderProgram, "firstTexture"), 0);
 	glUniform1i(glGetUniformLocation(shaderProgram, "secondTexture"), 1);
 
+	//define the transformation matrices
+	//----------------------------------
+	glm::mat4 model;
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	glm::mat4 view;
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	glm::mat4 projection;
+	projection = glm::perspective(glm::radians(50.0f), 16.0f/9.0f, 0.1f, 100.0f);
+
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+	//enable depth buffer
+	glEnable(GL_DEPTH_TEST);
+
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
+
+
 	//render loop
 	while (!glfwWindowShouldClose(window)) {
 
@@ -78,6 +118,8 @@ int main() {
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, firstTexture);
@@ -87,7 +129,21 @@ int main() {
 		glUseProgram(shaderProgram);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		//to draw multiple cubes just issue a draw call for each different cube
+		//at different positions unsing model matrix
+		for (int i = 0; i < 10; i++) {
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+
+		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -105,13 +161,51 @@ int main() {
 
 
 
+//create vertex buffer, vertex array and element buffer objects
 void createGLObjects(unsigned int& vbo, unsigned int& vao, unsigned int& ebo) {
 	float vertices[] = {
-		// positions          // colors           // texture coords
-		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+		// positions          // texture coords
+		 -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
 	unsigned int indices[] = { 
@@ -131,16 +225,14 @@ void createGLObjects(unsigned int& vbo, unsigned int& vao, unsigned int& ebo) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	//tell opengl how to interpret the vertex data
 	//position coordinates
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	//color values
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
 	//texture coordinates
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 }
 
+//creates the shader objects and use them to create shader program
 void createShaderProgram(unsigned int& shaderProgram) {
 	unsigned int vertexShader, fragmentShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -227,6 +319,7 @@ void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture) {
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true); 
 
+	//convert the image pixel date to bytes
 	unsigned char* data = stbi_load("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg", &width, &height, &nrChannels, 0);
 	if (data)
 	{
@@ -266,9 +359,21 @@ void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture) {
 }
 
 void processInput(GLFWwindow* window, unsigned int shaderProgram) {
+	glm::mat4 view;
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		moveDis -= 0.01f;
+		view = glm::translate(view, glm::vec3(moveDis, 0.0f, -3.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	}
+	else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		moveDis += 0.01f;
+		view = glm::translate(view, glm::vec3(moveDis, 0.0f, -3.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	}
+
 }
 
 void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
