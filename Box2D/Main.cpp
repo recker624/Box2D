@@ -14,16 +14,15 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 #define WIN_HEIGHT 1080
 #define WIN_WIDTH 1920
 
 float moveDis = 0;
 
-
 void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window, unsigned int shaderProgram);
-void createGLObjects();
 void createShaderProgram(unsigned int& shaderProgram);
 std::string getShaderSource(std::string fileName);
 void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type);
@@ -31,9 +30,11 @@ void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture);
 
 
 
-int main() {
+int main() 
+{
 	//initialize glfw
-	if (!glfwInit()) {
+	if (!glfwInit()) 
+	{
 		std::cout << "Failed to initialize GLFW" << std::endl;
 		return -1;
 	}
@@ -49,7 +50,8 @@ int main() {
 	//create window
 	// use glfwGetPrimaryMonitor() for fullscreen mode
 	GLFWwindow* window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Box 2D", NULL, NULL);
-	if (window == NULL) {
+	if (window == NULL) 
+	{
 		std::cout << "Window creation unsuccessful" << std::endl;
 		glfwTerminate();
 		return -1;
@@ -61,13 +63,15 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
 	
 	//initialize GLAD
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) 
+	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
 
-	float vertices[] = {
-		// positions          // texture coords
+	float vertices[] = 
+	{
+		// positions          // texture coord
 		 -0.5f, -0.5f, -0.5f,	0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,	1.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
@@ -111,19 +115,14 @@ int main() {
 		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f
 	};
 
-	unsigned int vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
 
+	VertexArray va;
 	VertexBuffer vbo(vertices, sizeof(vertices));
-
-	//tell opengl how to interpret the vertex data
-	//position coordinates
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
-	GLCall(glEnableVertexAttribArray(0));
-	//texture coordinates
-	GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
-	GLCall(glEnableVertexAttribArray(1));
+	VertexBufferLayout layout;
+	layout.Push<float>(3);		//position coordinates
+	layout.Push<float>(2);	//texture coordinates
+	va.AddBuffers(vbo, layout);
+	
 
 	//--------------------
 	//dealing with shaders
@@ -157,8 +156,8 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	//render loop
-	while (!glfwWindowShouldClose(window)) {
-
+	while (!glfwWindowShouldClose(window)) 
+	{
 		processInput(window, shaderProgram);
 
 		GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
@@ -169,6 +168,7 @@ int main() {
 		GLCall(glActiveTexture(GL_TEXTURE1));
 		GLCall(glBindTexture(GL_TEXTURE_2D, secondTexture));
 
+		va.Bind();
 		GLCall(glUseProgram(shaderProgram));
 		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 
@@ -184,7 +184,8 @@ int main() {
 
 
 //creates the shader objects and use them to create shader program
-void createShaderProgram(unsigned int& shaderProgram) {
+void createShaderProgram(unsigned int& shaderProgram) 
+{
 	unsigned int vertexShader, fragmentShader;
 	GLCall(vertexShader = glCreateShader(GL_VERTEX_SHADER));
 	GLCall(fragmentShader = glCreateShader(GL_FRAGMENT_SHADER));
@@ -212,7 +213,8 @@ void createShaderProgram(unsigned int& shaderProgram) {
 }
 
 //reads the shader text file and returns a string containing the source code
-std::string getShaderSource(std::string fileName) {
+std::string getShaderSource(std::string fileName)
+{
 	std::string sourceCode;
 	std::ifstream shaderFile(fileName);
 	if (shaderFile.is_open()) {
@@ -234,7 +236,8 @@ std::string getShaderSource(std::string fileName) {
 	return sourceCode;
 }
 
-void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type) {
+void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type)
+{
 	int success;
 	char infolog[1024];
 	//check what kind of object it is
@@ -255,7 +258,8 @@ void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type) {
 	
 }
 
-void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture) {
+void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture) 
+{
 
 	GLCall(glGenTextures(1, &firstTexture));
 	GLCall(glBindTexture(GL_TEXTURE_2D, firstTexture));
@@ -308,7 +312,8 @@ void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture) {
 
 }
 
-void processInput(GLFWwindow* window, unsigned int shaderProgram) {
+void processInput(GLFWwindow* window, unsigned int shaderProgram)
+{
 	glm::mat4 view;
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		GLCall(glfwSetWindowShouldClose(window, GL_TRUE));
@@ -326,7 +331,8 @@ void processInput(GLFWwindow* window, unsigned int shaderProgram) {
 
 }
 
-void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_resize_callback(GLFWwindow* window, int width, int height)
+{
 	//set dimensions for the viewport
 	GLCall(glViewport(0, 0, width, height));
 }

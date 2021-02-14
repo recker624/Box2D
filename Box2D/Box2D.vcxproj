@@ -160,6 +160,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="VertexArray.h" />
     <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="VertexBufferLayout.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Box2D.rc" />
