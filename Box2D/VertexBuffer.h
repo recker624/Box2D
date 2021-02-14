@@ -6,7 +6,7 @@ private:
 	unsigned int m_RendererID;
 
 public:
-	VertexBuffer(const float* data, unsigned int size, unsigned int &vao);
+	VertexBuffer(const float* data, unsigned int size);
 	~VertexBuffer();
 
 	//for unbinding and unbinding the buffer objects

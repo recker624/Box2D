@@ -56,7 +56,7 @@ int main() {
 	}
 
 	glfwMakeContextCurrent(window);
-	//register callback functions
+	//register the callback functions
 	//any callbacks should be registered after we have set a window context as "current"
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
 	
@@ -66,8 +66,67 @@ int main() {
 		return -1;
 	}
 
-	createGLObjects();
+	float vertices[] = {
+		// positions          // texture coords
+		 -0.5f, -0.5f, -0.5f,	0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,	1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f, 0.0f,
 
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,	0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f
+	};
+
+	unsigned int vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	VertexBuffer vbo(vertices, sizeof(vertices));
+
+	//tell opengl how to interpret the vertex data
+	//position coordinates
+	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
+	GLCall(glEnableVertexAttribArray(0));
+	//texture coordinates
+	GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
+	GLCall(glEnableVertexAttribArray(1));
+
+	//--------------------
+	//dealing with shaders
 	unsigned int shaderProgram;
 	createShaderProgram(shaderProgram);
 	glUseProgram(shaderProgram);
@@ -123,68 +182,6 @@ int main() {
 	return 0;
 }
 
-
-
-
-
-//create vertex buffer, vertex array and element buffer objects
-void createGLObjects() {
-	float vertices[] = {
-		// positions          // texture coords
-		 -0.5f, -0.5f, -0.5f,	0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,	1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,	0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,	0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f
-	};
-	unsigned int vao;
-
-	VertexBuffer vbo(vertices, sizeof(vertices), vao);
-	
-	//tell opengl how to interpret the vertex data
-	//position coordinates
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
-	GLCall(glEnableVertexAttribArray(0));
-	//texture coordinates
-	GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
-	GLCall(glEnableVertexAttribArray(1));
-}
 
 //creates the shader objects and use them to create shader program
 void createShaderProgram(unsigned int& shaderProgram) {
