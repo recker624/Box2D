@@ -10,7 +10,7 @@ public:
 	VertexArray();
 	~VertexArray();
 
-	//Since a vertex array object can multiple buffers inside it so we
+	//Since a vertex array object can store multiple buffers inside it so we
 	//create a separate function to be able to add different vertex buffers to it
 	void AddBuffers(const VertexBuffer& vb, const VertexBufferLayout& layout);
 

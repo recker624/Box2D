@@ -13,7 +13,6 @@
 		
 struct VertexBufferElement
 {
-	
 	unsigned int type;		
 	unsigned int count;		
 	unsigned int normalized;
@@ -67,6 +66,6 @@ public:
 	}
 
 	//we need to be able to get the stride of the data in the buffer and also return the elements
-	inline const std::vector<VertexBufferElement> GetElements() const { return m_Element; }
+	inline const std::vector<VertexBufferElement>& GetElements() const { return m_Element; }
 	inline unsigned int GetStride() const { return m_stride; }
 };

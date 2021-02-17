@@ -15,8 +15,8 @@ VertexArray::~VertexArray()
 //for more info refer to this : https://learnopengl.com/img/getting-started/vertex_array_objects.png
 void VertexArray::AddBuffers(const VertexBuffer& vb, const VertexBufferLayout& layout)
 {
-	Bind();	//Bind the vertex array
-	vb.Bind();	//Bind the buffer object
+	Bind();		//Bind the vertex array object
+	vb.Bind();	//Bind the buffer object so that it's added to the vertex array
 
 	//now set up the layout for the buffer object
 	const auto& elements = layout.GetElements();

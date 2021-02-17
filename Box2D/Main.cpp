@@ -15,6 +15,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
+#include "Shader.h"
 
 #define WIN_HEIGHT 1080
 #define WIN_WIDTH 1920
@@ -23,9 +24,6 @@ float moveDis = 0;
 
 void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window, unsigned int shaderProgram);
-void createShaderProgram(unsigned int& shaderProgram);
-std::string getShaderSource(std::string fileName);
-void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type);
 void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture);
 
 
@@ -71,7 +69,7 @@ int main()
 
 	float vertices[] = 
 	{
-		// positions          // texture coord
+		// positions          // texture coords
 		 -0.5f, -0.5f, -0.5f,	0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,	1.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
@@ -126,16 +124,15 @@ int main()
 
 	//--------------------
 	//dealing with shaders
-	unsigned int shaderProgram;
-	createShaderProgram(shaderProgram);
-	glUseProgram(shaderProgram);
+	Shader shaderProgram("vertex.vs", "fragment.txt");
+	shaderProgram.Bind();
 
 	unsigned int firstTexture, secondTexture;
 	applyTextures(firstTexture, secondTexture);
 
 	//set the values of sampler2d variables in fragment shader
-	glUniform1i(glGetUniformLocation(shaderProgram, "firstTexture"), 0);
-	glUniform1i(glGetUniformLocation(shaderProgram, "secondTexture"), 1);
+	glUniform1i(glGetUniformLocation(shaderProgram.GetShaderID(), "firstTexture"), 0);
+	glUniform1i(glGetUniformLocation(shaderProgram.GetShaderID(), "secondTexture"), 1);
 
 	//define the transformation matrices
 	//----------------------------------
@@ -148,9 +145,9 @@ int main()
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(50.0f), 16.0f/9.0f, 0.1f, 100.0f);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 	//enable depth buffer
 	glEnable(GL_DEPTH_TEST);
@@ -158,7 +155,7 @@ int main()
 	//render loop
 	while (!glfwWindowShouldClose(window)) 
 	{
-		processInput(window, shaderProgram);
+		processInput(window, shaderProgram.GetShaderID());
 
 		GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
 		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -169,7 +166,7 @@ int main()
 		GLCall(glBindTexture(GL_TEXTURE_2D, secondTexture));
 
 		va.Bind();
-		GLCall(glUseProgram(shaderProgram));
+		shaderProgram.Bind();
 		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 
 		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -180,82 +177,6 @@ int main()
 
 	glfwTerminate();
 	return 0;
-}
-
-
-//creates the shader objects and use them to create shader program
-void createShaderProgram(unsigned int& shaderProgram) 
-{
-	unsigned int vertexShader, fragmentShader;
-	GLCall(vertexShader = glCreateShader(GL_VERTEX_SHADER));
-	GLCall(fragmentShader = glCreateShader(GL_FRAGMENT_SHADER));
-
-	//attach shader with the source code
-	std::string vertexStrCode = getShaderSource("vertex.vs");
-	std::string fragmentStrCode = getShaderSource("fragment.txt");
-	const char* vShaderSourceCode = vertexStrCode.c_str();
-	const char* fShaderSourceCode = fragmentStrCode.c_str();
-
-	GLCall(glShaderSource(vertexShader, 1, &vShaderSourceCode, NULL));
-	GLCall(glCompileShader(vertexShader));
-	checkShaderCompileAndLinkErrors(vertexShader, "VERTEX");
-
-	GLCall(glShaderSource(fragmentShader, 1, &fShaderSourceCode, NULL));
-	GLCall(glCompileShader(fragmentShader));
-	checkShaderCompileAndLinkErrors(fragmentShader, "FRAGMENT");
-
-	//create the shader program by attaching the shaders 
-	GLCall(shaderProgram = glCreateProgram());
-	GLCall(glAttachShader(shaderProgram, vertexShader));
-	GLCall(glAttachShader(shaderProgram, fragmentShader));
-	GLCall(glLinkProgram(shaderProgram));
-	checkShaderCompileAndLinkErrors(shaderProgram, "PROGRAM");
-}
-
-//reads the shader text file and returns a string containing the source code
-std::string getShaderSource(std::string fileName)
-{
-	std::string sourceCode;
-	std::ifstream shaderFile(fileName);
-	if (shaderFile.is_open()) {
-		//ensure ifstream objects can throw exceptions
-		shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-		try {
-			//create stringstreams and read the file data into raw buffer
-			std::stringstream shaderStream;
-			shaderStream << shaderFile.rdbuf();
-			//close the files
-			shaderFile.close();
-			//read the buffer contents into a string
-			sourceCode = shaderStream.str();
-		}
-		catch (std::ifstream::failure e) {
-			std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-		}
-	}
-	return sourceCode;
-}
-
-void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type)
-{
-	int success;
-	char infolog[1024];
-	//check what kind of object it is
-	if (type == "VERTEX" || type == "FRAGMENT") {
-		GLCall(glGetShaderiv(ID, GL_COMPILE_STATUS, &success));
-		if (!success) {
-			GLCall(glGetShaderInfoLog(ID, 1024, NULL, infolog));
-			std::cout << "ERROR::SHADER::" << type << "::COMPILATION_FAILED" << infolog << std::endl;
-		}
-	}
-	else if (type == "PROGRAM") {
-		GLCall(glGetProgramiv(ID, GL_LINK_STATUS, &success));
-		if (!success) {
-			GLCall(glGetProgramInfoLog(ID, 1024, NULL, infolog));
-			std::cout << "ERROR::SHADER::PROGRAM" << type << "::LINKING_FAILED" << infolog << std::endl;
-		}
-	}
-	
 }
 
 void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture) 
