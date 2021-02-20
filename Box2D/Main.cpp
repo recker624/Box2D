@@ -16,6 +16,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 #define WIN_HEIGHT 1080
 #define WIN_WIDTH 1920
@@ -25,7 +26,6 @@ float moveDis = 0;
 void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window, unsigned int shaderProgram);
 void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture);
-
 
 
 int main() 
@@ -113,7 +113,7 @@ int main()
 		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f
 	};
 
-
+	//create buffer objects
 	VertexArray va;
 	VertexBuffer vbo(vertices, sizeof(vertices));
 	VertexBufferLayout layout;
@@ -121,18 +121,21 @@ int main()
 	layout.Push<float>(2);	//texture coordinates
 	va.AddBuffers(vbo, layout);
 	
-
 	//--------------------
-	//dealing with shaders
+	//SHADERS
 	Shader shaderProgram("vertex.vs", "fragment.txt");
 	shaderProgram.Bind();
 
-	unsigned int firstTexture, secondTexture;
-	applyTextures(firstTexture, secondTexture);
+	//--------
+	//TEXTURES
+	Texture texture;
+	texture.push("C:\\Users\\sahil\\OneDrive\\Desktop\\awesomeface.jpg");
+	texture.push("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg");
+	texture.CreateTexture();
 
 	//set the values of sampler2d variables in fragment shader
-	glUniform1i(glGetUniformLocation(shaderProgram.GetShaderID(), "firstTexture"), 0);
-	glUniform1i(glGetUniformLocation(shaderProgram.GetShaderID(), "secondTexture"), 1);
+	shaderProgram.SetUniformSampler2D("firstTexture", 0);
+	shaderProgram.SetUniformSampler2D("secondTexture", 1);
 
 	//define the transformation matrices
 	//----------------------------------
@@ -145,12 +148,12 @@ int main()
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(50.0f), 16.0f/9.0f, 0.1f, 100.0f);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	shaderProgram.SetUniform4f("model", model);
+	shaderProgram.SetUniform4f("view", view);
+	shaderProgram.SetUniform4f("projection", projection);
 
 	//enable depth buffer
-	glEnable(GL_DEPTH_TEST);
+	GLCall(glEnable(GL_DEPTH_TEST));
 
 	//render loop
 	while (!glfwWindowShouldClose(window)) 
@@ -160,10 +163,8 @@ int main()
 		GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
 		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-		GLCall(glActiveTexture(GL_TEXTURE0));
-		GLCall(glBindTexture(GL_TEXTURE_2D, firstTexture));
-		GLCall(glActiveTexture(GL_TEXTURE1));
-		GLCall(glBindTexture(GL_TEXTURE_2D, secondTexture));
+		texture.Bind(0);
+		//texture.Bind(1);
 
 		va.Bind();
 		shaderProgram.Bind();
@@ -179,59 +180,6 @@ int main()
 	return 0;
 }
 
-void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture) 
-{
-
-	GLCall(glGenTextures(1, &firstTexture));
-	GLCall(glBindTexture(GL_TEXTURE_2D, firstTexture));
-	// set the texture wrapping parameters
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));	// set texture wrapping to GL_REPEAT (default wrapping method)
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-	// set texture filtering parameters
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-	// load image, create texture and generate mipmaps
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true); 
-
-	//convert the image pixel date to bytes
-	unsigned char* data = stbi_load("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
-		GLCall(glGenerateMipmap(GL_TEXTURE_2D));
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-
-	// texture 2
-	GLCall(glGenTextures(1, &secondTexture));
-	GLCall(glBindTexture(GL_TEXTURE_2D, secondTexture));
-	// set the texture wrapping parameters
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));	// set texture wrapping to GL_REPEAT (default wrapping method)
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-	// set texture filtering parameters
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-	// load image, create texture and generate mipmaps
-	data = stbi_load("C:\\Users\\sahil\\OneDrive\\Desktop\\awesomeface.png", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		// note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
-		GLCall(glGenerateMipmap(GL_TEXTURE_2D));
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-}
 
 void processInput(GLFWwindow* window, unsigned int shaderProgram)
 {

@@ -1,7 +1,9 @@
 #pragma once
 #include<string>
 
-
+#include<glm/glm.hpp>
+#include<glm/gtc/matrix_transform.hpp>
+#include<glm/gtc/type_ptr.hpp>
 
 class Shader {
 private:
@@ -20,4 +22,8 @@ public:
 	std::string getShaderSource(std::string file);
 	void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type);
 	unsigned int& GetShaderID();
+
+	//set the uniform variables
+	void SetUniform4f(std::string varName, glm::mat4 matrix);
+	void SetUniformSampler2D(std::string varName, float value);
 };

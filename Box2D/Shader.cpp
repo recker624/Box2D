@@ -9,6 +9,9 @@
 #include<sstream>
 #include<string>
 
+/*
+* Takes in a file with shader source code and creates a shader program object using it
+*/
 
 Shader::Shader(std::string file_1, std::string file_2)
 	: filePath_1(file_1), filePath_2(file_2), m_ShaderID(0) 
@@ -103,4 +106,14 @@ void Shader::checkShaderCompileAndLinkErrors(unsigned int ID, std::string type)
 	}
 }
 
-unsigned int& Shader::GetShaderID(){ return m_ShaderID; }
+unsigned int& Shader::GetShaderID() { return m_ShaderID; }
+
+void Shader::SetUniform4f(std::string varName, glm::mat4 matrix)
+{
+	GLCall(glUniformMatrix4fv(glGetUniformLocation(m_ShaderID, varName.c_str()), 1, GL_FALSE, glm::value_ptr(matrix)));
+}
+
+void Shader::SetUniformSampler2D(std::string varName, float value)
+{
+	GLCall(glUniform1i(glGetUniformLocation(m_ShaderID, varName.c_str()), value));
+}
