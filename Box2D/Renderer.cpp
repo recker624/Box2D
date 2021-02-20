@@ -1,4 +1,5 @@
 #include"Renderer.h"
+
 #include<iostream>
 
 void GLClearError() {
@@ -8,8 +9,21 @@ void GLClearError() {
 
 bool GLLogCall(const char* func, const char* file, int line) {
 	while (GLenum error = glGetError()) {
-		std::cout << "[OpenGL error] (" << error << ") " << func << " " << file << " : " << line << std::endl;
+		std::cout << std::hex <<"[OpenGL error] (" << error << ") " << func << " " << file << " : " << line << std::endl;
 		return true;
 	}
 	return false;
+}
+
+void Renderer::Clear() const
+{
+	GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
+	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+}
+
+void Renderer::Draw(Shader &shader, VertexArray &va)
+{
+	va.Bind();
+	shader.Bind();
+	GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 }

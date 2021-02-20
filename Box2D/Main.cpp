@@ -12,21 +12,17 @@
 
 #include "stb_image.h"
 #include "Renderer.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
+//#include "IndexBuffer.h"
+#include"VertexBufferLayout.h"
 #include "Texture.h"
 
-#define WIN_HEIGHT 1080
-#define WIN_WIDTH 1920
+#define WIN_HEIGHT 576
+#define WIN_WIDTH 1024
 
 float moveDis = 0;
 
 void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window, unsigned int shaderProgram);
-void applyTextures(unsigned int& firstTexture, unsigned int& secondTexture);
-
 
 int main() 
 {
@@ -155,21 +151,18 @@ int main()
 	//enable depth buffer
 	GLCall(glEnable(GL_DEPTH_TEST));
 
+	Renderer renderer;
 	//render loop
 	while (!glfwWindowShouldClose(window)) 
 	{
 		processInput(window, shaderProgram.GetShaderID());
 
-		GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
-		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+		renderer.Clear();
 
 		texture.Bind(0);
-		//texture.Bind(1);
+		texture.Bind(1);
 
-		va.Bind();
-		shaderProgram.Bind();
-		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
-
+		renderer.Draw(shaderProgram, va);
 		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
@@ -185,7 +178,7 @@ void processInput(GLFWwindow* window, unsigned int shaderProgram)
 {
 	glm::mat4 view;
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		GLCall(glfwSetWindowShouldClose(window, GL_TRUE));
+		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 		moveDis -= 0.01f;

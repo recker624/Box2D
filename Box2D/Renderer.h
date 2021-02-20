@@ -1,5 +1,7 @@
 #pragma once
 #include<glad/glad.h>
+#include "Shader.h"
+#include "VertexArray.h"
 
 //if any error occurs then insert a breakpoint at that line
 #define ASSERT(x) if((x)) __debugbreak();
@@ -9,3 +11,10 @@
 
 void GLClearError();
 bool GLLogCall(const char* func, const char* file, int line);
+
+class Renderer
+{
+public:
+	void Clear() const;
+	void Draw(Shader &shader, VertexArray &va);
+};
