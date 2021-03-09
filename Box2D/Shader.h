@@ -19,7 +19,7 @@ public:
 	void UnBind() const;
 
 	void createShaderProgram();
-	std::string getShaderSource(std::string file);
+	std::string getShaderSourceCode(std::string file);
 	void checkShaderCompileAndLinkErrors(unsigned int ID, std::string type);
 	unsigned int& GetShaderID();
 

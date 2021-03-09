@@ -1,14 +1,12 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
+
 #include<glm/glm.hpp>
 #include<glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
 
 #include<iostream>
-#include<fstream>
-#include<sstream>
-#include<string>
 
 #include "stb_image.h"
 #include "Renderer.h"
@@ -109,6 +107,10 @@ int main()
 		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f
 	};
 
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+	//---------------------
 	//create buffer objects
 	VertexArray va;
 	VertexBuffer vbo(vertices, sizeof(vertices));
@@ -125,16 +127,16 @@ int main()
 	//--------
 	//TEXTURES
 	Texture texture;
-	texture.push("C:\\Users\\sahil\\OneDrive\\Desktop\\awesomeface.jpg");
+	//texture.push("C:\\Users\\sahil\\OneDrive\\Desktop\\awesomeface.png");
 	texture.push("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg");
 	texture.CreateTexture();
 
 	//set the values of sampler2d variables in fragment shader
 	shaderProgram.SetUniformSampler2D("firstTexture", 0);
-	shaderProgram.SetUniformSampler2D("secondTexture", 1);
+	//shaderProgram.SetUniformSampler2D("secondTexture", 1);
 
-	//define the transformation matrices
 	//----------------------------------
+	//define the transformation matrices
 	glm::mat4 model;
 	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -160,7 +162,7 @@ int main()
 		renderer.Clear();
 
 		texture.Bind(0);
-		texture.Bind(1);
+		//texture.Bind(1);
 
 		renderer.Draw(shaderProgram, va);
 		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);

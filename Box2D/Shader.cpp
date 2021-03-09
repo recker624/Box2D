@@ -34,6 +34,7 @@ void Shader::UnBind() const
 	GLCall(glUseProgram(0));
 }
 
+//Compile and link the individual shaders and combine them to make shader program
 void Shader::createShaderProgram()
 {
 	unsigned int vertexShader, fragmentShader;
@@ -41,8 +42,8 @@ void Shader::createShaderProgram()
 	GLCall(fragmentShader = glCreateShader(GL_FRAGMENT_SHADER));
 
 	//attach shader with the source code
-	std::string vertexStrCode = getShaderSource(filePath_1);
-	std::string fragmentStrCode = getShaderSource(filePath_2);
+	std::string vertexStrCode = getShaderSourceCode(filePath_1);
+	std::string fragmentStrCode = getShaderSourceCode(filePath_2);
 	const char* vShaderSourceCode = vertexStrCode.c_str();
 	const char* fShaderSourceCode = fragmentStrCode.c_str();
 
@@ -62,7 +63,8 @@ void Shader::createShaderProgram()
 	checkShaderCompileAndLinkErrors(m_ShaderID, "PROGRAM");
 }
 
-std::string Shader::getShaderSource(std::string fileName)
+//returns the source code of the shader files as strings
+std::string Shader::getShaderSourceCode(std::string fileName)
 {
 	std::string sourceCode;
 	std::ifstream shaderFile(fileName);
