@@ -145,11 +145,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\OpenGL\imgui.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\OpenGL\imgui_demo.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\OpenGL\imgui_draw.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\OpenGL\imgui_tables.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\OpenGL\imgui_widgets.cpp" />
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\glad.c" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -161,6 +156,7 @@
     <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />

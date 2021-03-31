@@ -20,7 +20,7 @@ void Texture::UnBind(unsigned int num) const
 
 void Texture::push(std::string path)
 {
-	if(vec.empty() != true)
+	if(vec.empty() == false)
 		vec.push_back({path, (unsigned int)vec.size()});
 	else
 		vec.push_back({ path, 0});
