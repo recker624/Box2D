@@ -69,6 +69,8 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	//initialize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) 
 	{
@@ -228,6 +230,14 @@ void processInput(GLFWwindow* window)
 	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
 		camera.ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		camera.ProcessKeyboard(Camera_Movement::UP, deltaTime);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		camera.ProcessKeyboard(Camera_Movement::DOWN, deltaTime);
 	}
 }
 
