@@ -1,15 +1,20 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
+//for matrix calculations
 #include<glm/glm.hpp>
 #include<glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
+
+//IMGUI (for GUI)
+#include"vendor/imgui/imgui.h"
+#include "vendor/imgui/imgui_impl_glfw.h"
+#include "vendor/imgui/imgui_impl_opengl3.h"
 
 #include<iostream>
 
 #include "stb_image.h"
 #include "Renderer.h"
-//#include "IndexBuffer.h"
 #include"VertexBufferLayout.h"
 #include "Texture.h"
 #include"camera.h"
@@ -31,7 +36,7 @@ float lastY = 600.0 / 2.0;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
-float lastFrame = 0.0f;
+float lastFrameTime = 0.0f;
 
 camera camera;
 
@@ -66,10 +71,10 @@ int main()
 	//register the callback functions
 	//any callbacks should be registered after we have set a window context as "current"
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
+	//glfwSetCursorPosCallback(window, mouse_callback);
+	//glfwSetScrollCallback(window, scroll_callback);
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	//initialize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) 
@@ -139,7 +144,7 @@ int main()
 	
 	//--------------------
 	//SHADERS
-	Shader shaderProgram("vertex.vs", "fragment.txt");
+	Shader shaderProgram("Resources/Shaders/vertex.vs", "Resources/Shaders/fragment.txt");
 	shaderProgram.Bind();
 
 	//--------
@@ -153,53 +158,71 @@ int main()
 	shaderProgram.SetUniformSampler2D("firstTexture", 0);
 	//shaderProgram.SetUniformSampler2D("secondTexture", 1);
 
-	//----------------------------------
-	//define the transformation matrices
-	//glm::mat4 model;
-	//model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-	glm::mat4 view;
-
-	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(50.0f), 16.0f/9.0f, 0.1f, 100.0f);
-
-	//shaderProgram.SetUniform4f("model", model);
-	//shaderProgram.SetUniform4f("view", view);
-	shaderProgram.SetUniform4f("projection", projection);
-
 	//enable depth buffer
 	GLCall(glEnable(GL_DEPTH_TEST));
 
 	Renderer renderer;
-	
-	float currentFrame;
+
+	//Create imgui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	ImGui_ImplOpenGL3_Init((char*)glGetString(330));
+
+	float currentFrameTime;
+
+	glm::vec3 moveVec(0.0f, 0.0f, 0.0f);
 	//render loop
 	while (!glfwWindowShouldClose(window)) 
 	{
 		//for hardware-independent movement speed
-		currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		currentFrameTime = glfwGetTime();
+		deltaTime = currentFrameTime - lastFrameTime;
+		lastFrameTime = currentFrameTime;
 
 		processInput(window);
 
 		renderer.Clear();
 
+		//Start the Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		texture.Bind(0);
 		//texture.Bind(1);
 
+		glm::mat4 model(1.0f);
+		glm::mat4 view;
+		glm::mat4 projection;
+
+		model = glm::translate(model, moveVec);
 		projection = glm::perspective(glm::radians(camera.Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 		view = camera.GetViewMatrix();
 
+		shaderProgram.SetUniform4f("model", model);
 		shaderProgram.SetUniform4f("projection", projection);
 		shaderProgram.SetUniform4f("view", view);
 
 		renderer.Draw(shaderProgram, va);
 		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
+		ImGui::SliderFloat3("Translate", &moveVec.x, -10.0f, 10.0f);           // Edit 1 float using a slider from 0.0f to 1.0f
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	//terminate imgui
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glfwTerminate();
 	return 0;

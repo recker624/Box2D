@@ -17,115 +17,133 @@
       <UniqueIdentifier>{5b1cabcc-1d97-4678-b2df-55227103c7c1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\imgui">
-      <UniqueIdentifier>{2c6d7cfa-be54-4b34-8c8b-3c6169281017}</UniqueIdentifier>
+      <UniqueIdentifier>{6bb9504e-2d68-47c0-838b-afe98d8a64d3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stb_image.cpp">
+    <ClCompile Include="src\stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
+    <ClCompile Include="src\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VertexBuffer.cpp">
+    <ClCompile Include="src\VertexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IndexBuffer.cpp">
+    <ClCompile Include="src\IndexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VertexArray.cpp">
+    <ClCompile Include="src\VertexArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
+    <ClCompile Include="src\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="src\Texture.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imgui_draw.cpp">
-      <Filter>Source Files\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imgui_tables.cpp">
-      <Filter>Source Files\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imgui_widgets.cpp">
-      <Filter>Source Files\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imgui.cpp">
-      <Filter>Source Files\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imgui_demo.cpp">
-      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\OpenGL\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vendor\imgui\imgui_impl_glfw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vendor\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vendor\imgui\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vendor\imgui\imgui_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vendor\imgui\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vendor\imgui\imgui_tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="src\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.h">
+    <ClInclude Include="src\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VertexBuffer.h">
+    <ClInclude Include="src\VertexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IndexBuffer.h">
+    <ClInclude Include="src\IndexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VertexArray.h">
+    <ClInclude Include="src\VertexArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
+    <ClInclude Include="src\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VertexBufferLayout.h">
+    <ClInclude Include="src\VertexBufferLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
+    <ClInclude Include="src\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="src\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
+    <ClInclude Include="src\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imgui_internal.h">
+    <ClInclude Include="src\vendor\imgui\imgui_impl_glfw.h">
       <Filter>Source Files\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imstb_rectpack.h">
+    <ClInclude Include="src\vendor\imgui\imgui_impl_opengl3.h">
       <Filter>Source Files\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imstb_textedit.h">
+    <ClInclude Include="src\vendor\imgui\imgui.h">
       <Filter>Source Files\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imstb_truetype.h">
+    <ClInclude Include="src\vendor\imgui\imconfig.h">
       <Filter>Source Files\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imconfig.h">
-      <Filter>Source Files\imgui</Filter>
+    <ClInclude Include="resource1.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Downloads\imgui-1.82\imgui-1.82\imgui.h">
-      <Filter>Source Files\imgui</Filter>
+    <ClInclude Include="src\vendor\imgui\imgui_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\imgui\imstb_rectpack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\imgui\imstb_textedit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\imgui\imstb_truetype.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Box2D.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertex.vs">
+    <None Include="Resources\Shaders\vertex.vs">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="fragment.txt">
+    <Text Include="Resources\Shaders\fragment.txt">
       <Filter>Shader</Filter>
     </Text>
   </ItemGroup>
