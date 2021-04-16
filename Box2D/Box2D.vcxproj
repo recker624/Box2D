@@ -189,10 +189,12 @@
     <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Shaders\lampVertex.vs" />
     <None Include="Resources\Shaders\vertex.vs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\Shaders\fragment.txt" />
+    <Text Include="Resources\Shaders\lampFragment.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -19,8 +19,8 @@
 #include "Texture.h"
 #include"camera.h"
 
-#define WIN_HEIGHT 576
-#define WIN_WIDTH 1024
+#define WIN_HEIGHT 1080
+#define WIN_WIDTH 1920
 
 float moveDis = 0;
 
@@ -28,6 +28,7 @@ void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow *window);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void no_mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 //GLOBAL VARIABLES
 bool firstMouse = true;
@@ -38,7 +39,16 @@ float lastY = 600.0 / 2.0;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrameTime = 0.0f;
 
-camera camera;
+
+/// for lighting
+float ambientStrength = 0.1f;
+float shininess = 256.0f;
+float specularStrength = 0.5f;
+
+glm::vec3 cameraPosition(0.0f, 5.0f, 10.0f);
+float yaw = -90.0f;
+float pitch = -35.0f;
+camera camera(cameraPosition, glm::vec3(0.0f, 1.0f, 0.0f), yaw, pitch);
 
 int main()
 {
@@ -71,7 +81,9 @@ int main()
 	//register the callback functions
 	//any callbacks should be registered after we have set a window context as "current"
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	//glfwSetCursorPosCallback(window, mouse_callback);
+
 	//glfwSetScrollCallback(window, scroll_callback);
 
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -85,48 +97,94 @@ int main()
 
 	float vertices[] = 
 	{
-		// positions          // texture coords
-		 -0.5f, -0.5f, -0.5f,	0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,	1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,	0.0f, 0.0f,
+		// positions          // normal vectors
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-		-0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,	1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,	1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,	0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,	1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,	1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,	0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+	};
+
+	float verticesLamp[] =
+	{
+		// positions       
+		 -0.5f, -0.5f, -0.5f,	
+		 0.5f, -0.5f, -0.5f,	
+		 0.5f,  0.5f, -0.5f,	
+		 0.5f,  0.5f, -0.5f,	
+		-0.5f,  0.5f, -0.5f,	
+		-0.5f, -0.5f, -0.5f,	
+
+		-0.5f, -0.5f,  0.5f,	
+		 0.5f, -0.5f,  0.5f,	
+		 0.5f,  0.5f,  0.5f,	
+		 0.5f,  0.5f,  0.5f,	
+		-0.5f,  0.5f,  0.5f,	
+		-0.5f, -0.5f,  0.5f,	
+
+		-0.5f,  0.5f,  0.5f,	
+		-0.5f,  0.5f, -0.5f,	
+		-0.5f, -0.5f, -0.5f,	
+		-0.5f, -0.5f, -0.5f,	
+		-0.5f, -0.5f,  0.5f,	
+		-0.5f,  0.5f,  0.5f,	
+
+		 0.5f,  0.5f,  0.5f,	
+		 0.5f,  0.5f, -0.5f,	
+		 0.5f, -0.5f, -0.5f,	
+		 0.5f, -0.5f, -0.5f,	
+		 0.5f, -0.5f,  0.5f,	
+		 0.5f,  0.5f,  0.5f,	
+
+		-0.5f, -0.5f, -0.5f, 
+		 0.5f, -0.5f, -0.5f,  
+		 0.5f, -0.5f,  0.5f,  
+		 0.5f, -0.5f,  0.5f, 
+		-0.5f, -0.5f,  0.5f, 
+		-0.5f, -0.5f, -0.5f, 
+
+		-0.5f,  0.5f, -0.5f, 
+		 0.5f,  0.5f, -0.5f, 
+		 0.5f,  0.5f,  0.5f,  
+		 0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,  
+		-0.5f,  0.5f, -0.5f
 	};
 
 	//enable blending
@@ -134,29 +192,40 @@ int main()
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 	//---------------------
-	//create buffer objects
+	//create buffer objects (for cube)
 	VertexArray va;
-	VertexBuffer vbo(vertices, sizeof(vertices));
+	VertexBuffer VBO(vertices, sizeof(vertices));
 	VertexBufferLayout layout;
 	layout.Push<float>(3);		//position coordinates
-	layout.Push<float>(2);	//texture coordinates
-	va.AddBuffers(vbo, layout);
+	//layout.Push<float>(2);	//texture coordinates
+	layout.Push<float>(3);	//normal vectors for diffuse lighting
+	va.AddBuffers(VBO, layout);
 	
+	//------------
+	//buffer objects (for light source)
+	VertexArray lampVAO;
+	VertexBuffer lampVBO(verticesLamp, sizeof(verticesLamp));
+	VertexBufferLayout lampLayout;
+	lampLayout.Push<float>(3);
+	lampVAO.AddBuffers(lampVBO, lampLayout);
+
 	//--------------------
-	//SHADERS
+	//SHADERS (for cube)
 	Shader shaderProgram("Resources/Shaders/vertex.vs", "Resources/Shaders/fragment.txt");
 	shaderProgram.Bind();
 
+	//-------------------
+	//Shader (for light source/lamp)
+	Shader lampShaderProgram("Resources/Shaders/lampVertex.vs", "Resources/Shaders/lampFragment.txt");
+
 	//--------
 	//TEXTURES
-	Texture texture;
-	//texture.push("C:\\Users\\sahil\\OneDrive\\Desktop\\awesomeface.png");
-	texture.push("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg");
-	texture.CreateTexture();
+	//Texture texture;
+	//texture.push("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg");
+	//texture.CreateTexture();
 
 	//set the values of sampler2d variables in fragment shader
-	shaderProgram.SetUniformSampler2D("firstTexture", 0);
-	//shaderProgram.SetUniformSampler2D("secondTexture", 1);
+	//shaderProgram.SetUniformSampler2D("firstTexture", 0);
 
 	//enable depth buffer
 	GLCall(glEnable(GL_DEPTH_TEST));
@@ -173,17 +242,21 @@ int main()
 
 	float currentFrameTime;
 
-	glm::vec3 moveVec(0.0f, 0.0f, 0.0f);
 	//render loop
 	while (!glfwWindowShouldClose(window)) 
 	{
+		//camera values
+		camera.Pitch = pitch;
+		camera.Yaw = yaw;
+		camera.Position = cameraPosition;
+		camera.updateCameraVectors();
+
 		//for hardware-independent movement speed
 		currentFrameTime = glfwGetTime();
 		deltaTime = currentFrameTime - lastFrameTime;
 		lastFrameTime = currentFrameTime;
 
 		processInput(window);
-
 		renderer.Clear();
 
 		//Start the Dear ImGui frame
@@ -191,25 +264,63 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		texture.Bind(0);
-		//texture.Bind(1);
+		//texture.Bind(0);
+
+		//for first cube
+		shaderProgram.Bind();
 
 		glm::mat4 model(1.0f);
-		glm::mat4 view;
-		glm::mat4 projection;
+		glm::mat4 view(1.0f);
+		glm::mat4 projection(1.0f);
+		glm::vec3 moveVec(0.0f, 0.0f, 0.0f);
+
+		glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+		glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+
+		glm::mat4 model_2(1.0f);
+		glm::vec3 moveVec_2(2 * sin(glfwGetTime()), 0.0f, 2 * cos(glfwGetTime()));
 
 		model = glm::translate(model, moveVec);
-		projection = glm::perspective(glm::radians(camera.Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 		view = camera.GetViewMatrix();
-
+		projection = glm::perspective(glm::radians(camera.Zoom), 1920 / 1080.0f, 0.1f, 100.0f);
+		
 		shaderProgram.SetUniform4f("model", model);
 		shaderProgram.SetUniform4f("projection", projection);
 		shaderProgram.SetUniform4f("view", view);
 
-		renderer.Draw(shaderProgram, va);
-		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		shaderProgram.SetUniform3f("lightColor", lightColor);
+		shaderProgram.SetUniform3f("objectColor", objectColor);
 
-		ImGui::SliderFloat3("Translate", &moveVec.x, -10.0f, 10.0f);           // Edit 1 float using a slider from 0.0f to 1.0f
+		shaderProgram.SetUniform3f("lightPos", moveVec_2);
+		shaderProgram.SetUniform3f("viewPos", camera.Position);
+		
+		shaderProgram.SetFloat("ambientStrength", ambientStrength);
+		shaderProgram.SetFloat("specularStrength", specularStrength);
+		shaderProgram.SetFloat("shininess", shininess);
+
+		renderer.Draw(shaderProgram, va);
+
+		//----------------
+		//the light source
+		lampShaderProgram.Bind();
+
+		model_2 = glm::translate(model_2, moveVec_2);
+		model_2 = glm::scale(model_2, glm::vec3(0.2f));
+		lampShaderProgram.SetUniform4f("model", model_2);
+		lampShaderProgram.SetUniform4f("projection", projection);
+		lampShaderProgram.SetUniform4f("view", view);
+
+		renderer.Draw(lampShaderProgram, lampVAO);
+
+		//for adding GUI to the window
+		ImGui::SliderFloat("Ambient", &ambientStrength, 0.0f, 1.0f);           
+		ImGui::SliderFloat("Specular", &specularStrength, 0.0f, 1.0f);
+		ImGui::SliderFloat("Shininess", &shininess, 2.0f, 2048.0f);
+
+		ImGui::SliderFloat3("Camera", &cameraPosition.x, -10.0, 10.0f);
+		ImGui::SliderFloat("Yaw", &yaw, -89.0f, 89.0f);
+		ImGui::SliderFloat("Pitch", &pitch, -45.0f, 45.0f);
+
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 		ImGui::Render();
@@ -233,7 +344,7 @@ void processInput(GLFWwindow* window)
 {
 	const float cameraSpeed = 2.5 * deltaTime;
 
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) 
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
@@ -242,23 +353,23 @@ void processInput(GLFWwindow* window)
 	{
 		camera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
 	}
-	else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
 		camera.ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
 	}
-	else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		camera.ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
 	}
-	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
 		camera.ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
 	}
-	else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
 		camera.ProcessKeyboard(Camera_Movement::UP, deltaTime);
 	}
-	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
 		camera.ProcessKeyboard(Camera_Movement::DOWN, deltaTime);
 	}
@@ -268,6 +379,11 @@ void framebuffer_resize_callback(GLFWwindow* window, int width, int height)
 {
 	//set dimensions for the viewport
 	GLCall(glViewport(0, 0, width, height));
+}
+
+void no_mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	//use this function when we don't want to do anything when cursor moves
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

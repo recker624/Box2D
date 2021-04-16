@@ -26,4 +26,6 @@ public:
 	//set the uniform variables
 	void SetUniform4f(std::string varName, glm::mat4 matrix);
 	void SetUniformSampler2D(std::string varName, float value);
+	void SetUniform3f(std::string varName, glm::vec3 vec);
+	void SetFloat(std::string varName, float val);
 };

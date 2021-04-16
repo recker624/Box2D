@@ -141,10 +141,12 @@
     <None Include="Resources\Shaders\vertex.vs">
       <Filter>Shader</Filter>
     </None>
+    <None Include="Resources\Shaders\lampVertex.vs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\Shaders\fragment.txt">
       <Filter>Shader</Filter>
     </Text>
+    <Text Include="Resources\Shaders\lampFragment.txt" />
   </ItemGroup>
 </Project>
