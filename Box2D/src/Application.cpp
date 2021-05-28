@@ -16,7 +16,6 @@
 #include "stb_image.h"
 #include "Renderer.h"
 #include"VertexBufferLayout.h"
-#include "Texture.h"
 #include"camera.h"
 
 #define WIN_HEIGHT 1080
@@ -36,17 +35,16 @@ float lastX = 800.0f / 2.0;
 float lastY = 600.0 / 2.0;
 
 // timing
-float deltaTime = 0.0f;	// time between current frame and last frame
+float deltaTime = 0.0f;
 float lastFrameTime = 0.0f;
-
 
 /// for lighting
 float ambientStrength = 0.1f;
 float shininess = 256.0f;
 float specularStrength = 0.5f;
 
-glm::vec3 cameraPosition(0.0f, 5.0f, 10.0f);
-float yaw = -90.0f;
+glm::vec3 cameraPosition(-8.0f, 6.0f, 8.0f);
+float yaw = -45.0f;
 float pitch = -35.0f;
 camera camera(cameraPosition, glm::vec3(0.0f, 1.0f, 0.0f), yaw, pitch);
 
@@ -218,15 +216,6 @@ int main()
 	//Shader (for light source/lamp)
 	Shader lampShaderProgram("Resources/Shaders/lampVertex.vs", "Resources/Shaders/lampFragment.txt");
 
-	//--------
-	//TEXTURES
-	//Texture texture;
-	//texture.push("C:\\Users\\sahil\\OneDrive\\Desktop\\container.jpg");
-	//texture.CreateTexture();
-
-	//set the values of sampler2d variables in fragment shader
-	//shaderProgram.SetUniformSampler2D("firstTexture", 0);
-
 	//enable depth buffer
 	GLCall(glEnable(GL_DEPTH_TEST));
 
@@ -248,7 +237,6 @@ int main()
 		//camera values
 		camera.Pitch = pitch;
 		camera.Yaw = yaw;
-		camera.Position = cameraPosition;
 		camera.updateCameraVectors();
 
 		//for hardware-independent movement speed
@@ -264,8 +252,6 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		//texture.Bind(0);
-
 		//for first cube
 		shaderProgram.Bind();
 
@@ -277,7 +263,6 @@ int main()
 		glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 		glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
 
-		glm::mat4 model_2(1.0f);
 		glm::vec3 moveVec_2(2 * sin(glfwGetTime()), 0.0f, 2 * cos(glfwGetTime()));
 
 		model = glm::translate(model, moveVec);
@@ -285,8 +270,8 @@ int main()
 		projection = glm::perspective(glm::radians(camera.Zoom), 1920 / 1080.0f, 0.1f, 100.0f);
 		
 		shaderProgram.SetUniform4f("model", model);
-		shaderProgram.SetUniform4f("projection", projection);
 		shaderProgram.SetUniform4f("view", view);
+		shaderProgram.SetUniform4f("projection", projection);
 
 		shaderProgram.SetUniform3f("lightColor", lightColor);
 		shaderProgram.SetUniform3f("objectColor", objectColor);
@@ -304,11 +289,13 @@ int main()
 		//the light source
 		lampShaderProgram.Bind();
 
+		glm::mat4 model_2(1.0f);
+
 		model_2 = glm::translate(model_2, moveVec_2);
 		model_2 = glm::scale(model_2, glm::vec3(0.2f));
 		lampShaderProgram.SetUniform4f("model", model_2);
-		lampShaderProgram.SetUniform4f("projection", projection);
 		lampShaderProgram.SetUniform4f("view", view);
+		lampShaderProgram.SetUniform4f("projection", projection);
 
 		renderer.Draw(lampShaderProgram, lampVAO);
 
@@ -317,7 +304,6 @@ int main()
 		ImGui::SliderFloat("Specular", &specularStrength, 0.0f, 1.0f);
 		ImGui::SliderFloat("Shininess", &shininess, 2.0f, 2048.0f);
 
-		ImGui::SliderFloat3("Camera", &cameraPosition.x, -10.0, 10.0f);
 		ImGui::SliderFloat("Yaw", &yaw, -89.0f, 89.0f);
 		ImGui::SliderFloat("Pitch", &pitch, -45.0f, 45.0f);
 
@@ -349,6 +335,7 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
+	//INPUT FOR THE CAMERA
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
 		camera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
@@ -383,7 +370,7 @@ void framebuffer_resize_callback(GLFWwindow* window, int width, int height)
 
 void no_mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	//use this function when we don't want to do anything when cursor moves
+	//use this function when we don't want to register camera movement when we move cursor
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
