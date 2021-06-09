@@ -18,12 +18,10 @@ void Texture::UnBind(unsigned int num) const
 	GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
+//push an image using this after creating a texture object
 void Texture::push(std::string path)
 {
-	if(vec.empty() == false)
-		vec.push_back({path, (unsigned int)vec.size()});
-	else
-		vec.push_back({ path, 0});
+	vec.push_back({path, (unsigned int) 0});
 }
 
 std::vector<textureInfo> Texture::getTexture() const
@@ -31,6 +29,7 @@ std::vector<textureInfo> Texture::getTexture() const
 	return vec;
 }
 
+//call this after all you have added all the textures using push()
 void Texture::CreateTexture()
 {
 	for (int i=0; i<vec.size(); i++)

@@ -1,31 +1,76 @@
 #version 330 core
 out vec4 FragColor;
-  
+
+struct Material{
+    float shininess;
+    sampler2D diffuseTexture;
+    sampler2D specularTexture;
+    sampler2D emissionTexture;
+};
+
+//since a material reflects different components of light with different intensity
+//thus we will have different values for each components of light (diffuse, ambient, specular)
+struct LightSource{
+    vec3 position;
+    float cutoff;
+    float outerCutoff;
+
+    vec3 direction;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    //for attenuation
+    float constant;
+    float linear;
+    float quadratic;
+
+    sampler2D flashLight;
+};
+
+in vec2 texCoords;
 in vec3 normal;
 in vec3 fragPos;
 
-uniform vec3 lightPos;  //the position of the light source
-uniform vec3 viewPos;
-uniform vec3 objectColor;
-uniform vec3 lightColor;
+uniform vec3 cameraPos;
 
-uniform float specularStrength;
-uniform float ambientStrength;
-uniform float shininess;
+uniform Material material;
+uniform LightSource lightSource;
+uniform float time;
+uniform vec2 viewPort;
 
 void main() {
-    vec3 ambient = ambientStrength * lightColor;
+    vec3 ambient = vec3(texture(material.diffuseTexture, texCoords)) * lightSource.ambient;
 
     vec3 norm = normalize(normal);
-    vec3 lightDir = normalize(lightPos - fragPos);
-    float diffuseFactor = max(dot(norm, lightDir), 0.0);
-    vec3 diffusedColor = diffuseFactor * lightColor;
+    vec3 lightDir = normalize(lightSource.position - fragPos);
+    vec3 fragmentDir = lightDir;
+    float theta = dot(fragmentDir, normalize(-lightSource.direction));
+    float epsilon   = lightSource.cutoff - lightSource.outerCutoff;
+    float intensity = clamp((theta - lightSource.outerCutoff) / epsilon, 0.0, 2.0);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffusedColor = vec3(texture(material.diffuseTexture, texCoords)) * diff * lightSource.diffuse;
 
-    vec3 viewDir = normalize(viewPos - fragPos);
+    vec3 viewDir = normalize(cameraPos - fragPos);
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-    vec3 specular = specularStrength * spec * lightColor;
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular = vec3(texture(material.specularTexture, texCoords)) * spec * lightSource.specular;
 
-    vec3 result = (ambient + diffusedColor + specular) * objectColor;
+    vec3 emission = vec3(texture(material.emissionTexture, texCoords + vec2(0.0, time * 0.5)));
+    vec3 emissionMask = step(vec3(1.0), vec3(1.0) - vec3(texture(material.specularTexture, texCoords)));
+    emission = emissionMask * emission;
+
+    float distance    = length(lightSource.position - fragPos);
+    float attenuation = 1.0 / (lightSource.constant + lightSource.linear * distance + lightSource.quadratic * (distance * distance));
+
+    vec2 fragCoord = vec2(gl_FragCoord.xy) / viewPort * vec2(1.0, -1.0);
+    intensity *= length(vec3(texture(lightSource.flashLight, fragCoord)));
+
+    ambient *= attenuation;
+    diffusedColor *= attenuation * intensity;
+    specular *= attenuation * intensity;
+
+    vec3 result = (ambient + diffusedColor + specular);
+
     FragColor = vec4(result, 1.0);
 }

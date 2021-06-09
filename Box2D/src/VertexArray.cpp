@@ -24,7 +24,7 @@ void VertexArray::AddBuffers(const VertexBuffer& vb, const VertexBufferLayout& l
 	unsigned int offset = 0;
 
 	//specify the format for each vertex buffer element
-	for (unsigned int i = 0; i < elements.size(); i ++) 
+	for (unsigned int i = 0; i < elements.size(); i++) 
 	{
 		const auto& element = elements[i];
 		GLCall(glVertexAttribPointer(i, element.count, element.type, element.normalized,
