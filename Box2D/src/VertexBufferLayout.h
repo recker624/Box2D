@@ -47,14 +47,14 @@ public:
 	template<>
 	void Push<float>(unsigned int count)
 	{
-		m_Element.push_back({GL_FLOAT, count, GL_FALSE});
+		m_Element.push_back({GL_FLOAT, count, GL_TRUE});
 		m_stride += VertexBufferElement::GetSizeOfType(GL_FLOAT) * count;
 	}
 
 	template<>
 	void Push<unsigned int>(unsigned int count)
 	{
-		m_Element.push_back({GL_UNSIGNED_INT, count, GL_FALSE});
+		m_Element.push_back({GL_UNSIGNED_INT, count, GL_TRUE });
 		m_stride += VertexBufferElement::GetSizeOfType(GL_UNSIGNED_INT) * count;
 	}
 

@@ -78,36 +78,44 @@ void LoadObject::readVertexAttribute()
 }
 
 //returns a normal array of floats to the main application containing all the vertex attributes 
-std::vector<float> LoadObject::getVertexAttributes()
+float* LoadObject::getVertexAttributes()
 {
-	std::vector<float> masterArray;
+	int size = getVertices().size() * 3 + getTexture().size() * 2 + getNormal().size() * 3;
+	float* masterArray = new float[size];
 
 	std::vector<glm::vec3> vertices = getVertices();
 	std::vector<glm::vec3> normals = getNormal();
 	std::vector<glm::vec2> textures = getTexture();
 
-	for (int i = 0; i < elements.vertices.size(); i++)
+	for (int i = 0; i < 36; i++)
 	{
-		masterArray.push_back(vertices[i].x);
-		masterArray.push_back(vertices[i].y);
-		masterArray.push_back(vertices[i].z);
-		masterArray.push_back(normals[i].x);
-		masterArray.push_back(normals[i].y);
-		masterArray.push_back(normals[i].z);
-		masterArray.push_back(textures[i].x);
-		masterArray.push_back(textures[i].y);
+		masterArray[i]		= (vertices[i].x);
+		masterArray[i + 1]	= (vertices[i].y);
+		masterArray[i + 2]	= (vertices[i].z);
+		masterArray[i + 3]	= (normals[i].x);
+		masterArray[i + 4]	= (normals[i].y);
+		masterArray[i + 5]	= (normals[i].z);
+		masterArray[i + 6]	= (textures[i].x);
+		masterArray[i + 7]	= (textures[i].y);
 	}
+
+
 	return masterArray;
+}
+
+int LoadObject::getVertexAttributeSize()
+{
+	return (getVertices().size() * 3 + getTexture().size() * 2 + getNormal().size() * 3);
 }
 
 std::vector<glm::vec3> LoadObject::getVertices()
 {
-	std::vector<glm::vec3> temp_vertiecs;
+	std::vector<glm::vec3> temp_vertices;
 	for (int i = 0; i < elements.vertices.size(); i++)
 	{
-		temp_vertiecs.push_back(vertexAttributes.vertices[elements.vertices[i]]);
+		temp_vertices.push_back(vertexAttributes.vertices[elements.vertices[i]]);
 	}
-	return temp_vertiecs;
+	return temp_vertices;
 }
 
 std::vector<glm::vec2> LoadObject::getTexture()

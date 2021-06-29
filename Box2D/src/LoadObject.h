@@ -35,10 +35,11 @@ public:
 	LoadObject(std::string fileName);
 	~LoadObject();
 
-	std::vector<float> getVertexAttributes();
+	float* getVertexAttributes();
 	std::vector<glm::vec3> getVertices();
 	std::vector<glm::vec2> getTexture();
 	std::vector<glm::vec3> getNormal();
+	int getVertexAttributeSize();
 private:
 	void readVertexAttribute();
 };

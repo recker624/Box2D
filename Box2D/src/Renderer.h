@@ -17,5 +17,5 @@ class Renderer
 {
 public:
 	void Clear() const;
-	void Draw(Shader &shader, VertexArray &va, int size) const;
+	void Draw(Shader &shader, VertexArray &va) const;
 };

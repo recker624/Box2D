@@ -20,9 +20,9 @@ void Renderer::Clear() const
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-void Renderer::Draw(Shader &shader, VertexArray &va, int size) const
+void Renderer::Draw(Shader &shader, VertexArray &va) const
 {
 	va.Bind();
 	shader.Bind();
-	glDrawArrays(GL_TRIANGLES, 0, size);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 }

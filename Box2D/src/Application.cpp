@@ -20,8 +20,8 @@
 #include"Texture.h"
 #include"LoadObject.h"
 
-#define WIN_HEIGHT 1080
-#define WIN_WIDTH 1920
+#define WIN_HEIGHT 768
+#define WIN_WIDTH 1366
 
 float moveDis = 0;
 
@@ -31,8 +31,8 @@ void processInput(GLFWwindow *window);
 
 //GLOBAL VARIABLES
 bool firstMouse = true;
-float lastX = 800.0f / 2.0;
-float lastY = 600.0 / 2.0;
+float lastX = WIN_WIDTH / 2.0;
+float lastY = WIN_HEIGHT / 2.0;
 
 // timing
 float deltaTime = 0.0f;
@@ -98,35 +98,78 @@ int main()
 	GLCall(glEnable(GL_BLEND));
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-	//Load the 3d model for our scene
-	LoadObject object("Blender_obj_files/light.obj");
-	//get all the coordinates
-	std::vector<float> vertices = object.getVertexAttributes();
+	float vertices[] = {
+		// positions          // normals           // texture coords
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+	};
 	//---------------------
 	//create buffer objects (for cube)
 	VertexArray VAO;
 
-	VertexBuffer VBO( &vertices[0], sizeof(vertices));
+	VertexBuffer VBO(vertices,	sizeof(vertices));
 	VertexBufferLayout layout;
 	layout.Push<float>(3);	//position coordinates
 	layout.Push<float>(3);	//normal coordinates
 	layout.Push<float>(2);	//texture coordinates
 	VAO.AddBuffers(VBO, layout);
-
+	
 	//--------------------
 	//SHADERS (for cube)
 	Shader shaderProgram("Resources/Shaders/vertex.vs", "Resources/Shaders/fragment.txt");
+
+	//buffer objects (for lamp)
+	VertexArray lampVAO;
+	lampVAO.AddBuffers(VBO, layout);
+	//--------------------
+	//SHADERS (for lamp)
+	Shader lampShaderProgram("Resources/Shaders/lampVertex.vs", "Resources/Shaders/lampFragment.txt");
+
 	shaderProgram.Bind();
-
-
 	//Set up the textures
 	Texture texture;
 	texture.push("C:/Users/sahil/OneDrive/Desktop/container2.jpg");
-	texture.push("C:/Users/sahil/OneDrive/Desktop/container2_specular.jpg");
 	texture.CreateTexture();
-	shaderProgram.SetUniformSampler2D("material.diffuseTexture", 0);
-	shaderProgram.SetUniformSampler2D("material.specularTexture", 1);
+	shaderProgram.SetUniformSampler2D("diffuseTexture", 0);
 
 	//enable depth buffer
 	GLCall(glEnable(GL_DEPTH_TEST));
@@ -162,8 +205,9 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		//---------------
+		//for the main cube
 		texture.Bind(0);
-		texture.Bind(1);
 		shaderProgram.Bind();
 
 		glm::mat4 model(1.0f);
@@ -171,17 +215,32 @@ int main()
 		glm::mat4 projection(1.0f);
 		glm::vec3 moveVec(0.0f, 0.0f, 0.0f);
 
-		glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
-
 		model = glm::translate(model, moveVec);
 		view = camera.GetViewMatrix();
-		projection = glm::perspective(glm::radians(camera.Zoom), 1920 / 1080.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(camera.Zoom), 16.0f/9.0f, 0.1f, 100.0f);
 		
 		shaderProgram.SetUniform4f("model", model);
 		shaderProgram.SetUniform4f("view", view);
 		shaderProgram.SetUniform4f("projection", projection);
 
-		renderer.Draw(shaderProgram, VAO, object.getVertices().size() * 3);
+		//renderer.Draw(shaderProgram, VAO, object.getVertices().size() * 3);
+		renderer.Draw(shaderProgram, VAO);
+
+		//---------------
+		//for the light source
+		lampShaderProgram.Bind();
+
+		glm::vec3 moveVec_2(1.2f, 1.0f, 2.0f);
+		glm::mat4 model_2;
+		model_2 = glm::translate(model_2, moveVec_2);
+		
+		lampShaderProgram.SetUniform4f("model", model_2);
+		lampShaderProgram.SetUniform4f("view", view);
+		lampShaderProgram.SetUniform4f("projection", projection);
+
+		//renderer.Draw(lampShaderProgram, VAO, object.getVertices().size() * 3);
+		renderer.Draw(lampShaderProgram, VAO);
+
 
 		//----------------
 		//for adding GUI to the window
