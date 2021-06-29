@@ -1,7 +1,6 @@
 #pragma once
 
 #include"VertexBuffer.h"
-
 //forward declaration to avoid cyclic #include calls between Renderer.h and VertexArray.h
 class VertexBufferLayout;
 

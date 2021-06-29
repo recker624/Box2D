@@ -1,5 +1,4 @@
 #include"Renderer.h"
-
 #include<iostream>
 
 void GLClearError() {
@@ -21,9 +20,9 @@ void Renderer::Clear() const
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-void Renderer::Draw(Shader &shader, VertexArray &va)
+void Renderer::Draw(Shader &shader, VertexArray &va, int size) const
 {
 	va.Bind();
 	shader.Bind();
-	GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+	glDrawArrays(GL_TRIANGLES, 0, size);
 }

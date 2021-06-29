@@ -18,6 +18,7 @@
 #include"VertexBufferLayout.h"
 #include"camera.h"
 #include"Texture.h"
+#include"LoadObject.h"
 
 #define WIN_HEIGHT 1080
 #define WIN_WIDTH 1920
@@ -27,8 +28,6 @@ float moveDis = 0;
 void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow *window);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void no_mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 //GLOBAL VARIABLES
 bool firstMouse = true;
@@ -87,12 +86,6 @@ int main()
 	//register the callback functions
 	//any callbacks should be registered after we have set a window context as "current"
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	//glfwSetCursorPosCallback(window, mouse_callback);
-
-	//glfwSetScrollCallback(window, scroll_callback);
-
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	//initialize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) 
@@ -100,154 +93,40 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-
-	float vertices[] = 
-	{
-		// positions          // normal vectors		//texture coordinates
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,	0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,	1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,	1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,	1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,	0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,	0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,	0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,	1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,	1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,	1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,	0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,	0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,	1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,	1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,	0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,	0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,	0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,	1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,	1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,	1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,	0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,	0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,	0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,	1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,	0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,	1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,	1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,	1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,	0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,	0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,	0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,	1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,	1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,	1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,	0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,	0.0f, 1.0f
-	};
-
-	float verticesLamp[] =
-	{
-		// positions       
-		 -0.5f, -0.5f, -0.5f,	
-		 0.5f, -0.5f, -0.5f,	
-		 0.5f,  0.5f, -0.5f,	
-		 0.5f,  0.5f, -0.5f,	
-		-0.5f,  0.5f, -0.5f,	
-		-0.5f, -0.5f, -0.5f,	
-
-		-0.5f, -0.5f,  0.5f,	
-		 0.5f, -0.5f,  0.5f,	
-		 0.5f,  0.5f,  0.5f,	
-		 0.5f,  0.5f,  0.5f,	
-		-0.5f,  0.5f,  0.5f,	
-		-0.5f, -0.5f,  0.5f,	
-
-		-0.5f,  0.5f,  0.5f,	
-		-0.5f,  0.5f, -0.5f,	
-		-0.5f, -0.5f, -0.5f,	
-		-0.5f, -0.5f, -0.5f,	
-		-0.5f, -0.5f,  0.5f,	
-		-0.5f,  0.5f,  0.5f,	
-
-		 0.5f,  0.5f,  0.5f,	
-		 0.5f,  0.5f, -0.5f,	
-		 0.5f, -0.5f, -0.5f,	
-		 0.5f, -0.5f, -0.5f,	
-		 0.5f, -0.5f,  0.5f,	
-		 0.5f,  0.5f,  0.5f,	
-
-		-0.5f, -0.5f, -0.5f, 
-		 0.5f, -0.5f, -0.5f,  
-		 0.5f, -0.5f,  0.5f,  
-		 0.5f, -0.5f,  0.5f, 
-		-0.5f, -0.5f,  0.5f, 
-		-0.5f, -0.5f, -0.5f, 
-
-		-0.5f,  0.5f, -0.5f, 
-		 0.5f,  0.5f, -0.5f, 
-		 0.5f,  0.5f,  0.5f,  
-		 0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f,  
-		-0.5f,  0.5f, -0.5f
-	};
-
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-
+	
 	//enable blending
 	GLCall(glEnable(GL_BLEND));
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
+	//Load the 3d model for our scene
+	LoadObject object("Blender_obj_files/light.obj");
+	//get all the coordinates
+	std::vector<float> vertices = object.getVertexAttributes();
+
 	//---------------------
 	//create buffer objects (for cube)
-	VertexArray va;
-	VertexBuffer VBO(vertices, sizeof(vertices));
+	VertexArray VAO;
+
+	VertexBuffer VBO( &vertices[0], sizeof(vertices));
 	VertexBufferLayout layout;
 	layout.Push<float>(3);	//position coordinates
-	layout.Push<float>(3);	//normal vectors for diffuse lighting
+	layout.Push<float>(3);	//normal coordinates
 	layout.Push<float>(2);	//texture coordinates
-	va.AddBuffers(VBO, layout);
-	
-	//------------
-	//buffer objects (for light source)
-	VertexArray lampVAO;
-	VertexBuffer lampVBO(verticesLamp, sizeof(verticesLamp));
-	VertexBufferLayout lampLayout;
-	lampLayout.Push<float>(3);
-	lampVAO.AddBuffers(lampVBO, lampLayout);
+	VAO.AddBuffers(VBO, layout);
 
 	//--------------------
 	//SHADERS (for cube)
 	Shader shaderProgram("Resources/Shaders/vertex.vs", "Resources/Shaders/fragment.txt");
 	shaderProgram.Bind();
 
-	//-------------------
-	//Shader (for light source/lamp)
-	Shader lampShaderProgram("Resources/Shaders/lampVertex.vs", "Resources/Shaders/lampFragment.txt");
 
 	//Set up the textures
 	Texture texture;
 	texture.push("C:/Users/sahil/OneDrive/Desktop/container2.jpg");
 	texture.push("C:/Users/sahil/OneDrive/Desktop/container2_specular.jpg");
-	texture.push("C:/Users/sahil/OneDrive/Desktop/matrix.jpg");
-	texture.push("C:/Users/sahil/OneDrive/Desktop/flashLight.jpg");
 	texture.CreateTexture();
 	shaderProgram.SetUniformSampler2D("material.diffuseTexture", 0);
 	shaderProgram.SetUniformSampler2D("material.specularTexture", 1);
-	shaderProgram.SetUniformSampler2D("material.emissionTexture", 2);
-	shaderProgram.SetUniformSampler2D("lightSource.flashLight", 3);
 
 	//enable depth buffer
 	GLCall(glEnable(GL_DEPTH_TEST));
@@ -262,8 +141,6 @@ int main()
 	ImGui::StyleColorsDark();
 	ImGui_ImplOpenGL3_Init((char*)glGetString(330));
 
-	float currentFrameTime;
-
 	//render loop
 	while (!glfwWindowShouldClose(window)) 
 	{
@@ -273,7 +150,7 @@ int main()
 		camera.updateCameraVectors();
 
 		//for hardware-independent movement speed
-		currentFrameTime = glfwGetTime();
+		float currentFrameTime = glfwGetTime();
 		deltaTime = currentFrameTime - lastFrameTime;
 		lastFrameTime = currentFrameTime;
 
@@ -285,90 +162,29 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		//for first cube
 		texture.Bind(0);
 		texture.Bind(1);
-		texture.Bind(2);
-		texture.Bind(3);
 		shaderProgram.Bind();
 
-		//glm::mat4 model(1.0f);
+		glm::mat4 model(1.0f);
 		glm::mat4 view(1.0f);
 		glm::mat4 projection(1.0f);
 		glm::vec3 moveVec(0.0f, 0.0f, 0.0f);
 
 		glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
 
-		glm::vec3 moveVec_2(2 * xPosLight, 2 * yPosLight, 2 * zPosLight);
-		//glm::vec3 moveVec_2(1.5 * sin(glfwGetTime()), 2 * yPosLight, 1.5 * cos(glfwGetTime()));
-
+		model = glm::translate(model, moveVec);
 		view = camera.GetViewMatrix();
 		projection = glm::perspective(glm::radians(camera.Zoom), 1920 / 1080.0f, 0.1f, 100.0f);
 		
+		shaderProgram.SetUniform4f("model", model);
 		shaderProgram.SetUniform4f("view", view);
 		shaderProgram.SetUniform4f("projection", projection);
 
-		glm::vec3 diffuseColor = glm::vec3(1.0f, 1.0f, 1.0f) * glm::vec3(0.5f); // decrease the influence
-		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
-
-		shaderProgram.SetUniform3f("lightSource.ambient", ambientColor);
-		shaderProgram.SetUniform3f("lightSource.diffuse", diffuseColor);
-		shaderProgram.SetUniform3f("lightSource.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-
-		shaderProgram.SetUniform3f("lightSource.position", camera.Position);
-		shaderProgram.SetUniform3f("lightSource.direction", camera.Front);
-		shaderProgram.SetFloat("lightSource.cutoff", glm::cos(glm::radians(12.5f)));
-		shaderProgram.SetFloat("lightSource.outerCutoff", glm::cos(glm::radians(17.5f)));
-		shaderProgram.SetUniform2f("viewPort", glm::vec2(WIN_WIDTH, WIN_HEIGHT));
-
-		//shaderProgram.SetUniform3f("lightSource.direction", glm::vec3(xPosLight, yPosLight, zPosLight));
-		shaderProgram.SetFloat("lightSource.constant", 1.0f);
-		shaderProgram.SetFloat("lightSource.linear", linear);
-		shaderProgram.SetFloat("lightSource.quadratic", quadratic);
-
-		shaderProgram.SetUniform3f("cameraPos", camera.Position);
-
-		shaderProgram.SetFloat("material.shininess", shininess);
-		float time = glfwGetTime();
-		shaderProgram.SetFloat("time", time);
-
-		for (unsigned int i = 0; i < 10; i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			shaderProgram.SetUniform4f("model", model);
-
-			renderer.Draw(shaderProgram, va);
-		}
-
-		
+		renderer.Draw(shaderProgram, VAO, object.getVertices().size() * 3);
 
 		//----------------
-		//the light source
-		//lampShaderProgram.Bind();
-
-		//glm::mat4 model_2(1.0f);
-
-		//model_2 = glm::translate(model_2, moveVec_2);
-		//model_2 = glm::scale(model_2, glm::vec3(0.2f));
-		//lampShaderProgram.SetUniform4f("model", model_2);
-		//lampShaderProgram.SetUniform4f("view", view);
-		//lampShaderProgram.SetUniform4f("projection", projection);
-
-		//renderer.Draw(lampShaderProgram, lampVAO);
-
 		//for adding GUI to the window
-		//ImGui::SliderFloat("LightSource_X", &xPosLight, -20.0f, 20.0f);
-		//ImGui::SliderFloat("LightSource_Y", &yPosLight, -20.0f, 20.0f);
-		//ImGui::SliderFloat("LightSource_Z", &zPosLight, -20.0f, 20.0f);
-		ImGui::SliderFloat("Shininess", &shininess, 8.0f, 128.0f);
-		ImGui::Text("Attenuation Parameters:");
-		ImGui::SliderFloat("Linear", &linear, 0.007f, 0.700f);
-		ImGui::SliderFloat("Quadratic", &quadratic, 0.0002, 1.8f);
-		
-
 		ImGui::SliderFloat("Yaw", &yaw, -89.0f, 89.0f);
 		ImGui::SliderFloat("Pitch", &pitch, -45.0f, 45.0f);
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -432,11 +248,6 @@ void framebuffer_resize_callback(GLFWwindow* window, int width, int height)
 	GLCall(glViewport(0, 0, width, height));
 }
 
-void no_mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-	//use this function when we don't want to register camera movement when we move cursor
-}
-
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	if (firstMouse)
@@ -452,9 +263,4 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	lastY = ypos;
 
 	camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	camera.ProcessMouseScroll(yoffset);
 }

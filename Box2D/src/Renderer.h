@@ -1,4 +1,5 @@
 #pragma once
+
 #include<glad/glad.h>
 #include "Shader.h"
 #include "VertexArray.h"
@@ -16,5 +17,5 @@ class Renderer
 {
 public:
 	void Clear() const;
-	void Draw(Shader &shader, VertexArray &va);
+	void Draw(Shader &shader, VertexArray &va, int size) const;
 };
