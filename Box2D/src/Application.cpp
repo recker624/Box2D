@@ -214,6 +214,8 @@ int main()
 		glm::mat4 view(1.0f);
 		glm::mat4 projection(1.0f);
 		glm::vec3 moveVec(0.0f, 0.0f, 0.0f);
+		glm::vec3 moveVec_2(1.2f, 1.0f, 2.0f);
+
 
 		model = glm::translate(model, moveVec);
 		view = camera.GetViewMatrix();
@@ -223,6 +225,8 @@ int main()
 		shaderProgram.SetUniform4f("view", view);
 		shaderProgram.SetUniform4f("projection", projection);
 
+		shaderProgram.SetUniform3f("lightPos", moveVec_2);
+
 		//renderer.Draw(shaderProgram, VAO, object.getVertices().size() * 3);
 		renderer.Draw(shaderProgram, VAO);
 
@@ -230,9 +234,9 @@ int main()
 		//for the light source
 		lampShaderProgram.Bind();
 
-		glm::vec3 moveVec_2(1.2f, 1.0f, 2.0f);
 		glm::mat4 model_2;
 		model_2 = glm::translate(model_2, moveVec_2);
+		model_2 = glm::scale(model_2, glm::vec3(0.2f));
 		
 		lampShaderProgram.SetUniform4f("model", model_2);
 		lampShaderProgram.SetUniform4f("view", view);
