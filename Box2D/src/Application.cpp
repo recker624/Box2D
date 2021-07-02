@@ -168,8 +168,10 @@ int main()
 	//Set up the textures
 	Texture texture;
 	texture.push("C:/Users/sahil/OneDrive/Desktop/container2.jpg");
+	texture.push("C:/Users/sahil/OneDrive/Desktop/container2_specular.jpg");
 	texture.CreateTexture();
 	shaderProgram.SetUniformSampler2D("diffuseTexture", 0);
+	shaderProgram.SetUniformSampler2D("specularTexture", 1);
 
 	//enable depth buffer
 	GLCall(glEnable(GL_DEPTH_TEST));
@@ -208,13 +210,14 @@ int main()
 		//---------------
 		//for the main cube
 		texture.Bind(0);
+		texture.Bind(1);
 		shaderProgram.Bind();
 
 		glm::mat4 model(1.0f);
 		glm::mat4 view(1.0f);
 		glm::mat4 projection(1.0f);
 		glm::vec3 moveVec(0.0f, 0.0f, 0.0f);
-		glm::vec3 moveVec_2(1.2f, 1.0f, 2.0f);
+		glm::vec3 moveVec_2(2.0f, 1.0f, 2.0f);
 
 
 		model = glm::translate(model, moveVec);
@@ -226,6 +229,12 @@ int main()
 		shaderProgram.SetUniform4f("projection", projection);
 
 		shaderProgram.SetUniform3f("lightPos", moveVec_2);
+		shaderProgram.SetUniform3f("viewPos", camera.Position);
+
+		shaderProgram.SetUniform3f("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+		shaderProgram.SetUniform3f("light.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
+		shaderProgram.SetUniform3f("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		shaderProgram.SetUniform3f("light.direction", glm::vec3(xPosLight, yPosLight, zPosLight));
 
 		//renderer.Draw(shaderProgram, VAO, object.getVertices().size() * 3);
 		renderer.Draw(shaderProgram, VAO);
@@ -250,6 +259,9 @@ int main()
 		//for adding GUI to the window
 		ImGui::SliderFloat("Yaw", &yaw, -89.0f, 89.0f);
 		ImGui::SliderFloat("Pitch", &pitch, -45.0f, 45.0f);
+		ImGui::SliderFloat("Light_X", &xPosLight, -1.00f, 1.00f);
+		ImGui::SliderFloat("Light_Y", &yPosLight, -1.00f, 1.00f);
+		ImGui::SliderFloat("Light_Z", &zPosLight, -1.00f, 1.00f);
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 		ImGui::Render();
