@@ -12,14 +12,14 @@
 
 struct VertexAttributes
 {
-	std::vector <glm::vec3> vertices;
+	std::vector <glm::vec3> position;
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texture;
 };
 
 struct Elements
 {
-	std::vector<int> vertices;
+	std::vector<int> postion;
 	std::vector<int> normals;
 	std::vector<int> texture;
 };
@@ -36,7 +36,7 @@ public:
 	~LoadObject();
 
 	float* getVertexAttributes();
-	std::vector<glm::vec3> getVertices();
+	std::vector<glm::vec3> getPosition();
 	std::vector<glm::vec2> getTexture();
 	std::vector<glm::vec3> getNormal();
 	int getVertexAttributeSize();

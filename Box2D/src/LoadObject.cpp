@@ -29,7 +29,7 @@ void LoadObject::readVertexAttribute()
 			std::istringstream in_str(line.substr(2));
 			glm::vec3 temp;
 			in_str >> temp.x >> temp.y >> temp.z;
-			vertexAttributes.vertices.push_back(temp);
+			vertexAttributes.position.push_back(temp);
 
 		}
 		else if (line.substr(0, 2) == "vt")
@@ -67,7 +67,7 @@ void LoadObject::readVertexAttribute()
 				in_str >> temp[i];
 
 				if (i % 3 == 0)
-					elements.vertices.push_back(temp[i] - 1);
+					elements.postion.push_back(temp[i] - 1);
 				else if (i % 3 == 1)
 					elements.texture.push_back(temp[i] - 1);
 				else if (i % 3 == 2)
@@ -80,10 +80,10 @@ void LoadObject::readVertexAttribute()
 //returns a normal array of floats to the main application containing all the vertex attributes 
 float* LoadObject::getVertexAttributes()
 {
-	int size = getVertices().size() * 3 + getTexture().size() * 2 + getNormal().size() * 3;
+	int size = getPosition().size() * 3 + getTexture().size() * 2 + getNormal().size() * 3;
 	float* masterArray = new float[size];
 
-	std::vector<glm::vec3> vertices = getVertices();
+	std::vector<glm::vec3> vertices = getPosition();
 	std::vector<glm::vec3> normals = getNormal();
 	std::vector<glm::vec2> textures = getTexture();
 
@@ -105,15 +105,15 @@ float* LoadObject::getVertexAttributes()
 
 int LoadObject::getVertexAttributeSize()
 {
-	return (getVertices().size() * 3 + getTexture().size() * 2 + getNormal().size() * 3);
+	return (getPosition().size() * 3 + getTexture().size() * 2 + getNormal().size() * 3);
 }
 
-std::vector<glm::vec3> LoadObject::getVertices()
+std::vector<glm::vec3> LoadObject::getPosition()
 {
 	std::vector<glm::vec3> temp_vertices;
-	for (int i = 0; i < elements.vertices.size(); i++)
+	for (int i = 0; i < elements.postion.size(); i++)
 	{
-		temp_vertices.push_back(vertexAttributes.vertices[elements.vertices[i]]);
+		temp_vertices.push_back(vertexAttributes.position[elements.postion[i]]);
 	}
 	return temp_vertices;
 }

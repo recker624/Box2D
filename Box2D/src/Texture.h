@@ -7,6 +7,7 @@ struct textureInfo
 {
 	std::string path;
 	unsigned int m_TextureID;
+	std::string type;
 };
 
 class Texture {
