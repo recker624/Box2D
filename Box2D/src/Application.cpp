@@ -20,10 +20,8 @@
 
 #include "stb_image.h"
 #include "Renderer.h"
-#include"VertexBufferLayout.h"
 #include"camera.h"
 #include"Texture.h"
-#include"LoadObject.h"
 
 #define WIN_HEIGHT 768
 #define WIN_WIDTH 1366
@@ -147,24 +145,17 @@ int main()
 		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 	};
-	//---------------------
-	//create buffer objects (for cube)
-	VertexArray VAO;
 
-	VertexBuffer VBO(vertices,	sizeof(vertices));
-	VertexBufferLayout layout;
-	layout.Push<float>(3);	//position coordinates
-	layout.Push<float>(3);	//normal coordinates
-	layout.Push<float>(2);	//texture coordinates
-	VAO.AddBuffers(VBO, layout);
-	
+	//---------------------
+	//Load the model
+
+
 	//--------------------
 	//SHADERS (for cube)
 	Shader shaderProgram("Resources/Shaders/vertex.vs", "Resources/Shaders/fragment.txt");
 
 	//buffer objects (for lamp)
-	VertexArray lampVAO;
-	lampVAO.AddBuffers(VBO, layout);
+	
 	//--------------------
 	//SHADERS (for lamp)
 	Shader lampShaderProgram("Resources/Shaders/lampVertex.vs", "Resources/Shaders/lampFragment.txt");
@@ -182,7 +173,6 @@ int main()
 	GLCall(glEnable(GL_DEPTH_TEST));
 
 	Renderer renderer;
-
 	//Create imgui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
