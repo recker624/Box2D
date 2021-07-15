@@ -12,16 +12,14 @@
 #include "vendor/imgui/imgui_impl_opengl3.h"
 
 //Model loading
-#include<assimp/Importer.hpp>
-#include<assimp/scene.h>
-#include<assimp/postprocess.h>
-
-#include<iostream>
+#include"Model.h"
 
 #include "stb_image.h"
 #include "Renderer.h"
 #include"camera.h"
 #include"Texture.h"
+
+#include<iostream>
 
 #define WIN_HEIGHT 768
 #define WIN_WIDTH 1366
@@ -56,6 +54,7 @@ float quadratic = 0.032f;
 glm::vec3 cameraPosition(-8.0f, 6.0f, 8.0f);
 float yaw = -45.0f;
 float pitch = -35.0f;
+
 camera camera(cameraPosition, glm::vec3(0.0f, 1.0f, 0.0f), yaw, pitch);
 
 int main()
@@ -101,73 +100,18 @@ int main()
 	GLCall(glEnable(GL_BLEND));
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-	float vertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-	};
-
 	//---------------------
 	//Load the model
-
+	char path[] = "C:/Users/sahil/OneDrive/Desktop/backpack/backpack.obj";
+	Model model(path);
 
 	//--------------------
 	//SHADERS (for cube)
 	Shader shaderProgram("Resources/Shaders/vertex.vs", "Resources/Shaders/fragment.txt");
 
 	//buffer objects (for lamp)
-	
-	//--------------------
-	//SHADERS (for lamp)
-	Shader lampShaderProgram("Resources/Shaders/lampVertex.vs", "Resources/Shaders/lampFragment.txt");
 
 	shaderProgram.Bind();
-	//Set up the textures
-	Texture texture;
-	texture.push("C:/Users/sahil/OneDrive/Desktop/container2.jpg");
-	texture.push("C:/Users/sahil/OneDrive/Desktop/container2_specular.jpg");
-	texture.CreateTexture();
-	shaderProgram.SetUniformSampler2D("diffuseTexture", 0);
-	shaderProgram.SetUniformSampler2D("specularTexture", 1);
 
 	//enable depth buffer
 	GLCall(glEnable(GL_DEPTH_TEST));
@@ -204,22 +148,19 @@ int main()
 
 		//---------------
 		//for the main cube
-		texture.Bind(0);
-		texture.Bind(1);
 		shaderProgram.Bind();
 
-		glm::mat4 model(1.0f);
+		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 view(1.0f);
 		glm::mat4 projection(1.0f);
 		glm::vec3 moveVec(0.0f, 0.0f, 0.0f);
 		glm::vec3 moveVec_2(2.0f, 1.0f, 2.0f);
 
-
-		model = glm::translate(model, moveVec);
+		modelMatrix = glm::translate(modelMatrix, moveVec);
 		view = camera.GetViewMatrix();
 		projection = glm::perspective(glm::radians(camera.Zoom), 16.0f/9.0f, 0.1f, 100.0f);
 		
-		shaderProgram.SetUniform4f("model", model);
+		shaderProgram.SetUniform4f("model", modelMatrix);
 		shaderProgram.SetUniform4f("view", view);
 		shaderProgram.SetUniform4f("projection", projection);
 
@@ -231,24 +172,8 @@ int main()
 		shaderProgram.SetUniform3f("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		shaderProgram.SetUniform3f("light.direction", glm::vec3(xPosLight, yPosLight, zPosLight));
 
-		//renderer.Draw(shaderProgram, VAO, object.getVertices().size() * 3);
-		renderer.Draw(shaderProgram, VAO);
-
-		//---------------
-		//for the light source
-		lampShaderProgram.Bind();
-
-		glm::mat4 model_2;
-		model_2 = glm::translate(model_2, moveVec_2);
-		model_2 = glm::scale(model_2, glm::vec3(0.2f));
-		
-		lampShaderProgram.SetUniform4f("model", model_2);
-		lampShaderProgram.SetUniform4f("view", view);
-		lampShaderProgram.SetUniform4f("projection", projection);
-
-		//renderer.Draw(lampShaderProgram, VAO, object.getVertices().size() * 3);
-		renderer.Draw(lampShaderProgram, VAO);
-
+		//render the object
+		model.Draw(shaderProgram);
 
 		//----------------
 		//for adding GUI to the window

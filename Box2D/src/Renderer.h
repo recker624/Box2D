@@ -2,7 +2,6 @@
 
 #include<glad/glad.h>
 #include "Shader.h"
-#include "VertexArray.h"
 
 //if any error occurs then insert a breakpoint at that line
 #define ASSERT(x) if((x)) __debugbreak();
@@ -17,5 +16,4 @@ class Renderer
 {
 public:
 	void Clear() const;
-	void Draw(Shader &shader, VertexArray &va) const;
 };

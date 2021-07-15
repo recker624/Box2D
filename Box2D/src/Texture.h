@@ -12,13 +12,12 @@ struct textureInfo
 
 class Texture {
 private:
-	std::vector<textureInfo> vec;
+	textureInfo vec;
 public:
+	Texture(std::string filePath);
+	~Texture();
 
-	void Bind(unsigned int num) const;
-	void UnBind(unsigned int num) const;
-
-	void push(std::string path);
-	void CreateTexture();
-	std::vector<textureInfo> getTexture() const;
+	void Bind() const;
+	void UnBind() const;
+	unsigned int CreateTexture();
 };

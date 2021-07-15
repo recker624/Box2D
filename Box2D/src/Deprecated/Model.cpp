@@ -1,4 +1,5 @@
 #include"Model.h"
+#include"Texture.h"
 
 Model::Model(char* path)
 {
@@ -25,7 +26,7 @@ void Model::Draw(Shader& shader)
 }
 
 //process the parent node
-//extract all the meshes from the child node as well
+//extract and process all the meshes from the child node as well
 void Model::processNode(aiNode *node, const aiScene *scene) {
 	for (unsigned int i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
@@ -40,12 +41,14 @@ void Model::processNode(aiNode *node, const aiScene *scene) {
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	std::vector<TextureStruct> textures;
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
 
+		//-----------------
+		//vertex attributes
 		glm::vec3 vector;
 
 		vector.x = mesh->mVertices[i].x;
@@ -72,6 +75,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 		vertices.push_back(vertex);
 	}
 	
+	//-----------------
 	//indices
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		aiFace face = mesh->mFaces[i];
@@ -80,15 +84,16 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 		}
 	}
 
+	//-----------------
 	//To retrieve the material of a mesh, we need to index the scene's mMaterials array. 
 	//The mesh's material index is set in its mMaterialIndex property,
 	//which we can also query to check if the mesh contains a material or not.
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		std::vector<Texture> diffuseMaps = loadMaterialTextures(material,
+		std::vector<TextureStruct> diffuseMaps = loadMaterialTextures(material,
 											aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-		std::vector<Texture> specularMaps = loadMaterialTextures(material,
+		std::vector<TextureStruct> specularMaps = loadMaterialTextures(material,
 											aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
@@ -98,14 +103,14 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 
 //store all the loaded textures from the files into an array 
 //so that if similar texture is found than it can be reused from the array 
-//instead of reimporting the texture every time
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+//instead of loading a texture every iteration
+std::vector<TextureStruct> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 {
-	std::vector<Texture> textures;
+	std::vector<TextureStruct> textures;
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 	{
 		aiString str;
-		mat->GetTexture(type, i, &str);
+		mat->GetTexture(type, i, &str);	// retrieve each of the texture's file locations and store it in a string
 		bool skip = false;
 		for (unsigned int j = 0; j < textures_loaded.size(); j++) {
 			if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0) {
@@ -116,7 +121,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		}
 
 		if (!skip) {
-			Texture texture;
+			TextureStruct texture;
 			texture.ID = TextureFromFile(str.C_Str(), directory);
 			texture.type = typeName;
 			texture.path = str.C_Str();
@@ -126,6 +131,10 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 	return textures;
 }
 
-unsigned int Model::TextureFromFile(const char * str, std::string directory) {
+unsigned int Model::TextureFromFile(const char * file, std::string directory) {
+	std::string fileName = std::string(file);
+	std::string filePath = directory + '/' + fileName;
 
+	TextureStruct texture(filePath);
+	unsigned int ID = texture.CreateTexture();
 }
