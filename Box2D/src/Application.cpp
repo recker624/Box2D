@@ -175,6 +175,8 @@ int main()
 		//----------------
 		//for adding GUI to the window
 		reset = ImGui::Button("Reset");
+		ImGui::Text("------------------------------------");
+
 		ImGui::Text("Translate");
 		ImGui::SliderFloat("translateX", &moveVec.x, -10.0f, 10.0f);
 		ImGui::SliderFloat("translateY", &moveVec.y, -10.0f, 10.0f);
