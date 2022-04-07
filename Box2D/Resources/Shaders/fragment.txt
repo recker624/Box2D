@@ -5,48 +5,77 @@ in vec2 texCoords;
 in vec3 normal;
 in vec3 fragPos;
 
-struct Material {
-    sampler2D diffuse;
-    vec3      specular;
-    float     shininess;
-};
-
-struct Light {
-    vec3 position;
-  
+struct directionalLight {  
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
-
-    //for directional light
     vec3 direction;
+};
+
+struct lamp {
+    vec3 position;
+ 
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
 };
 
 uniform sampler2D texture_diffuse0;
 uniform sampler2D texture_specular0;
 
-uniform vec3 lightPos;
-uniform vec3 viewPos;
+uniform vec3 lampLightPos;
+uniform vec3 cameraPos;
 
-uniform Light light;
-uniform Material material;
+uniform bool lampActive;
+uniform bool directionalActive;
+
+uniform directionalLight sunLight;
+uniform lamp lampLight;
 
 void main() {
-    vec3 ambient = light.ambient * vec3(texture(texture_diffuse0, texCoords));
-
     vec3 norm = normal;
-    //vec3 lightDir = normalize(lightPos - fragPos);  //for point light  
-    vec3 lightDir = normalize(-light.direction);  //for directional light
-    float diff = max(dot(norm, lightDir), 0);
-    vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse0, texCoords));
+    vec3 lampLightDir, sunLightDir;
 
-    vec3 viewDir = normalize(viewPos - fragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0), 32);
-    vec3 specular = light.specular * spec * vec3(texture(texture_specular0, texCoords));
+    float lampDiff = 1.0f, sunDiff = 1.0f;
+    float lampSpec = 0.0f, sunSpec = 0.0f;
+
+    vec3 viewDir = normalize(cameraPos - fragPos);
+
+    vec3 lightDiffuse   = vec3(0.0f);
+    vec3 lightSpecular  = vec3(0.0f);
+    vec3 lightAmbient   = vec3(0.0f);
+
+    if(lampActive) {
+        lampLightDir = normalize(lampLightPos - fragPos);  //for point light  
+        lampDiff = max(dot(norm, lampLightDir), 0);
+
+        //lamp's contribution in total spec value
+        vec3 lampReflectDir = reflect(-lampLightDir, norm);
+        lampSpec = pow(max(dot(viewDir, lampReflectDir), 0), 32);
+
+        lightDiffuse    += lampLight.diffuse;
+        lightSpecular   += lampLight.specular;
+        lightAmbient    += lampLight.ambient;
+    }
+
+    if (directionalActive) {
+        sunLightDir = normalize(-sunLight.direction);  //for directional light
+        sunDiff = max(dot(norm, sunLightDir), 0);
+
+        //directional light (sunlight) contribution in total spec value
+        vec3 sunReflectDir = reflect(-sunLightDir, norm);
+        sunSpec = pow(max(dot(viewDir, sunReflectDir), 0), 32);
+
+        lightDiffuse    += sunLight.diffuse;
+        lightSpecular   += sunLight.specular;
+        lightAmbient    += sunLight.ambient;
+    }
+
+    vec3 diffuse    = lightDiffuse * (lampDiff + sunDiff) * vec3(texture(texture_diffuse0, texCoords));
+    vec3 specular   = lightSpecular * (lampSpec + sunSpec)  * vec3(texture(texture_specular0, texCoords));
+    vec3 ambient    = lightAmbient * vec3(texture(texture_diffuse0, texCoords));
 
     vec3 result = (diffuse + ambient + specular);
 
     FragColor = vec4(result, 1.0);
-
 }
