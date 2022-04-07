@@ -49,6 +49,7 @@ static glm::vec3 scaleVec(1.0f);
 static float rotateX = 0;
 static float rotateY = 0;
 static float rotateZ = 0;
+static bool reset = false;
 
 //x y z coordinates of the lightCube
 static float xPosLight = -0.2f;
@@ -171,6 +172,44 @@ int main()
 		//render the object
 		model.Draw(shaderProgram);
 
+		//----------------
+		//for adding GUI to the window
+		reset = ImGui::Button("Reset");
+		ImGui::Text("Translate");
+		ImGui::SliderFloat("translateX", &moveVec.x, -10.0f, 10.0f);
+		ImGui::SliderFloat("translateY", &moveVec.y, -10.0f, 10.0f);
+		ImGui::SliderFloat("translateZ", &moveVec.z, -10.0f, 10.0f);
+		ImGui::Text("------------------------------------");
+		ImGui::Text("Rotate");
+		ImGui::SliderFloat("rotateX", &rotateX, -90.0f, 90.0f);
+		ImGui::SliderFloat("rotateY", &rotateY, -90.0f, 90.0f);
+		ImGui::SliderFloat("rotateZ", &rotateZ, -90.0f, 90.0f);
+		ImGui::Text("------------------------------------");
+		ImGui::Text("Scale");
+		ImGui::SliderFloat("scaleX", &scaleVec.x, 1.0f, 5.0f);
+		ImGui::SliderFloat("scaleY", &scaleVec.y, 1.0f, 5.0f);
+		ImGui::SliderFloat("scaleZ", &scaleVec.z, 1.0f, 5.0f);
+
+		if (reset) {
+			moveVec = glm::vec3(0.0f);
+			scaleVec = glm::vec3(1.0f);
+			rotateX = 0.0f;
+			rotateY = 0.0f;
+			rotateZ = 0.0f;
+		}
+		ImGui::Text("------------------------------------");
+		ImGui::Checkbox("Enable Directional Light", &directionalActive);
+		ImGui::SliderFloat("SunLight_X", &xDirLight, -1.00f, 1.00f);
+		ImGui::SliderFloat("SunLight_Y", &yDirLight, -1.00f, 1.00f);
+		ImGui::SliderFloat("SunLight_Z", &zDirLight, -1.00f, 1.00f);	
+		ImGui::Text("------------------------------------");
+		ImGui::Checkbox("Enable Lamp", &lampActive);
+		ImGui::SliderFloat("LampLight_X", &moveVec_2.x, -5.00f, 5.00f);
+		ImGui::SliderFloat("LampLight_Y", &moveVec_2.y, -5.00f, 5.00f);
+		ImGui::SliderFloat("LampLight_Z", &moveVec_2.z, -5.00f, 5.00f);
+		ImGui::Text("------------------------------------");
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
 		//for the lamp model (if active)
 		if (lampActive) {
 			lampShaderProgram.Bind();
@@ -184,33 +223,7 @@ int main()
 
 			lampModel.Draw(lampShaderProgram);
 		}
-		
-		//----------------
-		//for adding GUI to the window
-		ImGui::Text("Translate");
-		ImGui::SliderFloat("translateX", &moveVec.x, -10.0f, 10.0f);
-		ImGui::SliderFloat("translateY", &moveVec.y, -10.0f, 10.0f);
-		ImGui::SliderFloat("translateZ", &moveVec.z, -10.0f, 10.0f);
-		ImGui::Text("Rotate");
-		ImGui::SliderFloat("rotateX", &rotateX, -90.0f, 90.0f);
-		ImGui::SliderFloat("rotateY", &rotateY, -90.0f, 90.0f);
-		ImGui::SliderFloat("rotateZ", &rotateZ, -90.0f, 90.0f);
-		ImGui::Text("Scale");
-		ImGui::SliderFloat("scaleX", &scaleVec.x, 1.0f, 5.0f);
-		ImGui::SliderFloat("scaleY", &scaleVec.y, 1.0f, 5.0f);
-		ImGui::SliderFloat("scaleZ", &scaleVec.z, 1.0f, 5.0f);
 
-		ImGui::Checkbox("Enable Directional Light", &directionalActive);
-		ImGui::SliderFloat("SunLight_X", &xDirLight, -1.00f, 1.00f);
-		ImGui::SliderFloat("SunLight_Y", &yDirLight, -1.00f, 1.00f);
-		ImGui::SliderFloat("SunLight_Z", &zDirLight, -1.00f, 1.00f);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-		ImGui::Checkbox("Enable Lamp", &lampActive);
-		ImGui::SliderFloat("LampLight_X", &moveVec_2.x, -5.00f, 5.00f);
-		ImGui::SliderFloat("LampLight_Y", &moveVec_2.y, -5.00f, 5.00f);
-		ImGui::SliderFloat("LampLight_Z", &moveVec_2.z, -5.00f, 5.00f);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
