@@ -30,26 +30,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -189,12 +189,32 @@
     <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="3d Models\backpack\backpack.mtl" />
+    <None Include="3d Models\Sphere\lightSphere.mtl" />
+    <None Include="assimp-vc142-mt.dll" />
+    <None Include="Blender_obj_files\light.mtl" />
+    <None Include="imgui.ini" />
+    <None Include="RCa08312" />
+    <None Include="RCa12124" />
+    <None Include="RCa14188" />
+    <None Include="RCb12124" />
+    <None Include="RCb14188" />
+    <None Include="RCc12124" />
+    <None Include="RCc14188" />
     <None Include="Resources\Shaders\lampVertex.vs" />
     <None Include="Resources\Shaders\vertex.vs" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="3d Models\backpack\source_attribution.txt" />
     <Text Include="Resources\Shaders\fragment.txt" />
     <Text Include="Resources\Shaders\lampFragment.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="3d Models\backpack\ao.jpg" />
+    <Image Include="3d Models\backpack\diffuse.jpg" />
+    <Image Include="3d Models\backpack\normal.png" />
+    <Image Include="3d Models\backpack\roughness.jpg" />
+    <Image Include="3d Models\backpack\specular.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

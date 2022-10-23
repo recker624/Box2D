@@ -127,11 +127,41 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Resources\Shaders\lampVertex.vs" />
+    <None Include="assimp-vc142-mt.dll" />
+    <None Include="3d Models\backpack\backpack.mtl" />
+    <None Include="3d Models\Sphere\lightSphere.mtl" />
+    <None Include="Blender_obj_files\light.mtl" />
+    <None Include="RCc14188" />
+    <None Include="imgui.ini" />
+    <None Include="RCa08312" />
+    <None Include="RCa12124" />
+    <None Include="RCa14188" />
+    <None Include="RCb12124" />
+    <None Include="RCb14188" />
+    <None Include="RCc12124" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\Shaders\fragment.txt">
       <Filter>Shader</Filter>
     </Text>
     <Text Include="Resources\Shaders\lampFragment.txt" />
+    <Text Include="3d Models\backpack\source_attribution.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="3d Models\backpack\ao.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="3d Models\backpack\diffuse.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="3d Models\backpack\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="3d Models\backpack\roughness.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="3d Models\backpack\specular.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
